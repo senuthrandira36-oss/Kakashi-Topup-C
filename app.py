@@ -131,6 +131,8 @@ def admin_action(oid,action):
     con.execute("UPDATE orders SET status=?,confirmed_at=CURRENT_TIMESTAMP WHERE id=?",(status,oid));con.commit()
     o=order_row(con,oid);con.close();return jsonify(order=dict(o))
 
+# Initialize database on app startup (works with Gunicorn/production imports).
+init_db()
+
 if __name__=="__main__":
-    init_db()
     app.run(debug=True)
