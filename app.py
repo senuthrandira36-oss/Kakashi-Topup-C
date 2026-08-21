@@ -33,6 +33,8 @@ def init_db():
         created_at TEXT DEFAULT CURRENT_TIMESTAMP, confirmed_at TEXT)""")
     con.commit(); con.close()
 
+init_db()
+
 def is_admin_request():
     return session.get("role") == "admin" or request.headers.get("X-Admin-Key") == ADMIN_API_KEY
 
@@ -131,6 +133,15 @@ def admin_action(oid,action):
     con.execute("UPDATE orders SET status=?,confirmed_at=CURRENT_TIMESTAMP WHERE id=?",(status,oid));con.commit()
     o=order_row(con,oid);con.close();return jsonify(order=dict(o))
 
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify(message="Internal server error"), 500
+
+@app.errorhandler(404)
+def not_found(error):
+    if request.path.startswith("/api/"):
+        return jsonify(message="API endpoint not found"), 404
+    return error, 404
+
 if __name__=="__main__":
-    init_db()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
