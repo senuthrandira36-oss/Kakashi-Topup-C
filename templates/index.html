@@ -1,910 +1,2203 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kakashi Topup Store | Free Fire Diamonds</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { --primary:#ff1a1a; --primary-dark:#b30000; --accent:#ffcc00; --dark:#0a0a0a; --darker:#050505; --card:#111111; --text:#ffffff; --text-muted:#888888; --border:#222222; --glow:rgba(255,26,26,0.3); --success:#00d084; --warning:#ff9500; }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Rajdhani',sans-serif; background:var(--darker); color:var(--text); overflow-x:hidden; }
-        ::-webkit-scrollbar { width:8px; }
-        ::-webkit-scrollbar-track { background:var(--dark); }
-        ::-webkit-scrollbar-thumb { background:var(--primary); border-radius:4px; }
-        #particles { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
-        .particle { position:absolute; width:2px; height:2px; background:var(--primary); border-radius:50%; animation:float 15s infinite; opacity:0.6; }
-        @keyframes float { 0%,100%{transform:translateY(0) translateX(0);opacity:0;} 10%{opacity:0.6;} 90%{opacity:0.6;} 100%{transform:translateY(-100vh) translateX(50px);opacity:0;} }
-        .toast-container { position:fixed; top:90px; right:20px; z-index:3000; display:flex; flex-direction:column; gap:10px; }
-        .toast { background:var(--card); border:1px solid var(--border); border-left:4px solid var(--primary); border-radius:10px; padding:15px 20px; min-width:300px; box-shadow:0 10px 30px rgba(0,0,0,0.5); animation:toastIn 0.3s ease; display:flex; align-items:center; gap:12px; }
-        .toast.success { border-left-color:var(--success); } .toast.warning { border-left-color:var(--warning); }
-        .toast i { font-size:20px; } .toast.success i { color:var(--success); } .toast.warning i { color:var(--warning); }
-        @keyframes toastIn { from{transform:translateX(100%);opacity:0;} to{transform:translateX(0);opacity:1;} }
-        @keyframes toastOut { to{transform:translateX(100%);opacity:0;} }
-        nav { position:fixed; top:0; width:100%; background:rgba(5,5,5,0.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); z-index:1000; padding:0 5%; }
-        .nav-container { max-width:1400px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; height:70px; }
-        .logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
-        .logo-icon { width:45px; height:45px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 0 20px var(--glow); }
-        .logo-text { font-family:'Orbitron',sans-serif; font-size:22px; font-weight:900; color:var(--text); letter-spacing:2px; }
-        .logo-text span { color:var(--primary); }
-        .nav-links { display:flex; gap:25px; list-style:none; align-items:center; }
-        .nav-links a { color:var(--text-muted); text-decoration:none; font-weight:600; font-size:15px; letter-spacing:1px; transition:all 0.3s; position:relative; }
-        .nav-links a:hover { color:var(--primary); }
-        .nav-links a::after { content:''; position:absolute; bottom:-5px; left:0; width:0; height:2px; background:var(--primary); transition:width 0.3s; }
-        .nav-links a:hover::after { width:100%; }
-        .mobile-menu-btn { display:none; background:none; border:none; color:var(--text); font-size:24px; cursor:pointer; }
-        .user-menu { display:flex; align-items:center; gap:15px; position:relative; }
-        .user-avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; cursor:pointer; border:2px solid var(--border); transition:all 0.3s; }
-        .user-avatar:hover { border-color:var(--primary); box-shadow:0 0 15px var(--glow); }
-        .btn-login { padding:8px 20px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border:none; border-radius:8px; color:white; font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.3s; text-transform:uppercase; letter-spacing:1px; }
-        .btn-login:hover { transform:scale(1.05); box-shadow:0 5px 15px var(--glow); }
-        .dropdown-menu { position:absolute; top:55px; right:0; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px 0; min-width:220px; box-shadow:0 10px 30px rgba(0,0,0,0.5); display:none; z-index:1001; }
-        .dropdown-menu.active { display:block; animation:dropdownIn 0.2s ease; }
-        @keyframes dropdownIn { from{opacity:0;transform:translateY(-10px);} to{opacity:1;transform:translateY(0);} }
-        .dropdown-menu a, .dropdown-menu button { display:flex; align-items:center; gap:10px; padding:12px 20px; color:var(--text); text-decoration:none; font-size:14px; font-weight:600; background:none; border:none; width:100%; cursor:pointer; transition:all 0.2s; font-family:'Rajdhani',sans-serif; }
-        .dropdown-menu a:hover, .dropdown-menu button:hover { background:rgba(255,26,26,0.1); color:var(--primary); }
-        .dropdown-divider { height:1px; background:var(--border); margin:8px 0; }
-        .admin-badge { background:var(--primary); color:white; font-size:10px; padding:2px 8px; border-radius:4px; margin-left:5px; text-transform:uppercase; font-weight:700; }
-        .hero { min-height:100vh; display:flex; align-items:center; justify-content:center; position:relative; padding:100px 5% 50px; background:radial-gradient(ellipse at center,rgba(255,26,26,0.1) 0%,transparent 70%); }
-        .hero-content { text-align:center; max-width:900px; z-index:1; }
-        .hero-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(255,26,26,0.15); border:1px solid var(--primary); padding:8px 20px; border-radius:50px; font-size:14px; font-weight:600; color:var(--primary); margin-bottom:25px; animation:pulse 2s infinite; }
-        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,26,26,0.4);} 50%{box-shadow:0 0 0 10px rgba(255,26,26,0);} }
-        .hero h1 { font-family:'Orbitron',sans-serif; font-size:clamp(36px,6vw,72px); font-weight:900; line-height:1.1; margin-bottom:20px; text-transform:uppercase; }
-        .hero h1 .highlight { color:var(--primary); text-shadow:0 0 30px var(--glow); }
-        .hero p { font-size:18px; color:var(--text-muted); max-width:600px; margin:0 auto 40px; line-height:1.7; }
-        .hero-buttons { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
-        .btn { padding:15px 40px; border-radius:8px; font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all 0.3s; border:none; text-decoration:none; display:inline-flex; align-items:center; gap:10px; }
-        .btn-primary { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:white; box-shadow:0 4px 20px var(--glow); }
-        .btn-primary:hover { transform:translateY(-3px); box-shadow:0 8px 30px var(--glow); }
-        .btn-secondary { background:transparent; color:var(--text); border:2px solid var(--border); }
-        .btn-secondary:hover { border-color:var(--primary); color:var(--primary); transform:translateY(-3px); }
-        .btn-success { background:linear-gradient(135deg,var(--success),#00a86b); color:white; }
-        .btn-success:hover { transform:translateY(-3px); }
-        .trust-badges { display:flex; justify-content:center; gap:40px; margin-top:40px; flex-wrap:wrap; }
-        .trust-badge { display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:14px; }
-        .trust-badge i { color:var(--primary); font-size:20px; }
-        .hero-stats { display:flex; justify-content:center; gap:60px; margin-top:60px; flex-wrap:wrap; }
-        .stat { text-align:center; }
-        .stat-number { font-family:'Orbitron',sans-serif; font-size:36px; font-weight:900; color:var(--primary); }
-        .stat-label { font-size:14px; color:var(--text-muted); text-transform:uppercase; letter-spacing:2px; }
-        section { padding:100px 5%; position:relative; }
-        .section-header { text-align:center; margin-bottom:60px; }
-        .section-header h2 { font-family:'Orbitron',sans-serif; font-size:clamp(28px,4vw,42px); font-weight:900; margin-bottom:15px; text-transform:uppercase; }
-        .section-header h2 span { color:var(--primary); }
-        .section-header p { color:var(--text-muted); font-size:16px; max-width:500px; margin:0 auto; }
-        .section-line { width:60px; height:3px; background:linear-gradient(90deg,var(--primary),transparent); margin:20px auto; }
-        .membership-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:25px; max-width:1400px; margin:0 auto; }
-        .membership-card { background:var(--card); border:2px solid var(--border); border-radius:20px; padding:35px 25px; text-align:center; transition:all 0.4s; position:relative; cursor:pointer; }
-        .membership-card:hover { border-color:var(--primary); transform:translateY(-10px); box-shadow:0 20px 40px rgba(0,0,0,0.5),0 0 30px var(--glow); }
-        .membership-card.featured { border-color:var(--primary); background:linear-gradient(180deg,var(--card) 0%,rgba(255,26,26,0.1) 100%); }
-        .membership-card.popular { border-color:var(--primary); box-shadow:0 0 20px var(--glow); }
-        .popular-badge { position:absolute; top:15px; right:-30px; background:var(--primary); color:white; padding:5px 40px; font-size:12px; font-weight:700; text-transform:uppercase; transform:rotate(45deg); z-index:2; }
-        .membership-icon { width:70px; height:70px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:32px; box-shadow:0 10px 30px var(--glow); }
-        .membership-card h3 { font-family:'Orbitron',sans-serif; font-size:20px; margin-bottom:10px; }
-        .membership-card .price { font-size:36px; font-weight:900; color:var(--primary); margin-bottom:20px; }
-        .membership-card .price span { font-size:14px; color:var(--text-muted); }
-        .membership-features { list-style:none; text-align:left; margin-bottom:25px; }
-        .membership-features li { padding:8px 0; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:14px; }
-        .membership-features li i { color:var(--primary); }
-        .btn-order { width:100%; padding:12px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border:none; border-radius:8px; color:white; font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:700; text-transform:uppercase; cursor:pointer; transition:all 0.3s; letter-spacing:1px; }
-        .btn-order:hover { transform:scale(1.05); box-shadow:0 5px 20px var(--glow); }
-        .offers-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:25px; max-width:1200px; margin:0 auto; }
-        .offer-card { background:linear-gradient(135deg,var(--card),var(--dark)); border:1px solid var(--border); border-radius:16px; padding:25px; display:flex; gap:15px; align-items:center; transition:all 0.3s; cursor:pointer; }
-        .offer-card:hover { border-color:var(--primary); transform:translateX(10px); }
-        .offer-icon { min-width:60px; height:60px; background:rgba(255,26,26,0.15); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--primary); }
-        .offer-content h3 { font-family:'Orbitron',sans-serif; font-size:17px; margin-bottom:6px; }
-        .offer-content p { color:var(--text-muted); font-size:13px; line-height:1.5; }
-        .offer-badge { display:inline-block; background:var(--primary); color:white; padding:4px 12px; border-radius:4px; font-size:11px; font-weight:700; margin-top:8px; }
-        .how-to-order { background:var(--dark); }
-        .steps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:25px; max-width:1200px; margin:0 auto; }
-        .step-card { text-align:center; padding:25px; position:relative; }
-        .step-number { width:55px; height:55px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:22px; font-weight:900; margin:0 auto 15px; box-shadow:0 0 20px var(--glow); }
-        .step-card h3 { font-family:'Orbitron',sans-serif; font-size:17px; margin-bottom:8px; }
-        .step-card p { color:var(--text-muted); font-size:14px; line-height:1.6; }
-        .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.88); backdrop-filter:blur(10px); display:none; align-items:center; justify-content:center; z-index:2000; padding:20px; overflow-y:auto; }
-        .modal-overlay.active { display:flex; }
-        .modal { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:35px; max-width:500px; width:100%; position:relative; animation:modalIn 0.3s ease; margin:auto; }
-        .modal.wide { max-width:900px; } .modal.xwide { max-width:1100px; }
-        @keyframes modalIn { from{opacity:0;transform:scale(0.9);} to{opacity:1;transform:scale(1);} }
-        .modal-close { position:absolute; top:20px; right:20px; background:none; border:none; color:var(--text-muted); font-size:24px; cursor:pointer; transition:color 0.3s; }
-        .modal-close:hover { color:var(--primary); }
-        .modal h2 { font-family:'Orbitron',sans-serif; font-size:22px; margin-bottom:25px; text-align:center; }
-        .modal h2 span { color:var(--primary); }
-        .form-group { margin-bottom:18px; }
-        .form-group label { display:block; margin-bottom:6px; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:1px; }
-        .form-group input, .form-group select { width:100%; padding:14px; background:var(--dark); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:'Rajdhani',sans-serif; font-size:15px; transition:all 0.3s; }
-        .form-group input:focus, .form-group select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 10px var(--glow); }
-        .form-group input::placeholder { color:var(--text-muted); }
-        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
-        .order-summary { background:var(--dark); border-radius:12px; padding:18px; margin-bottom:18px; }
-        .order-summary h4 { font-family:'Orbitron',sans-serif; font-size:13px; margin-bottom:12px; color:var(--primary); }
-        .summary-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:14px; }
-        .summary-row.total { border-bottom:none; font-size:17px; font-weight:700; color:var(--primary); }
-        .auth-tabs { display:flex; gap:10px; margin-bottom:20px; }
-        .auth-tab { flex:1; padding:12px; background:var(--dark); border:1px solid var(--border); border-radius:8px; color:var(--text-muted); font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.3s; text-transform:uppercase; }
-        .auth-tab.active { background:var(--primary); color:white; border-color:var(--primary); }
-        .auth-tab:hover:not(.active) { border-color:var(--primary); color:var(--primary); }
-        .auth-panel { display:none; } .auth-panel.active { display:block; }
-        .admin-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:15px; margin-bottom:25px; }
-        .admin-stat-card { background:var(--dark); border:1px solid var(--border); border-radius:12px; padding:18px; text-align:center; }
-        .admin-stat-card i { font-size:24px; color:var(--primary); margin-bottom:8px; }
-        .admin-stat-card .number { font-family:'Orbitron',sans-serif; font-size:26px; font-weight:900; color:var(--text); }
-        .admin-stat-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; }
-        .orders-table-container { overflow-x:auto; }
-        .orders-table { width:100%; border-collapse:collapse; font-size:13px; }
-        .orders-table th { background:var(--dark); padding:12px; text-align:left; font-family:'Orbitron',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--primary); border-bottom:2px solid var(--primary); }
-        .orders-table td { padding:12px; border-bottom:1px solid var(--border); color:var(--text-muted); }
-        .orders-table tr:hover td { background:rgba(255,26,26,0.05); color:var(--text); }
-        .status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase; }
-        .status-pending { background:rgba(255,149,0,0.15); color:var(--warning); border:1px solid var(--warning); }
-        .status-confirmed { background:rgba(0,208,132,0.15); color:var(--success); border:1px solid var(--success); }
-        .status-cancelled { background:rgba(255,26,26,0.15); color:var(--primary); border:1px solid var(--primary); }
-        .btn-confirm { padding:5px 12px; background:var(--success); border:none; border-radius:6px; color:white; font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.3s; text-transform:uppercase; }
-        .btn-confirm:hover { background:#00b870; transform:scale(1.05); }
-        .btn-cancel { padding:5px 12px; background:transparent; border:1px solid var(--primary); border-radius:6px; color:var(--primary); font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.3s; margin-left:4px; }
-        .btn-cancel:hover { background:var(--primary); color:white; }
-        .btn-notify { padding:5px 12px; background:linear-gradient(135deg,#25d366,#128c7e); border:none; border-radius:6px; color:white; font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.3s; margin-left:4px; }
-        .btn-notify:hover { transform:scale(1.05); }
-        .btn-view { padding:5px 12px; background:var(--primary); border:none; border-radius:6px; color:white; font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.3s; margin-left:4px; }
-        .btn-view:hover { transform:scale(1.05); }
-        .member-orders { margin-top:20px; }
-        .order-card { background:var(--dark); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
-        .order-card-info h4 { font-family:'Orbitron',sans-serif; font-size:15px; margin-bottom:4px; }
-        .order-card-info p { font-size:12px; color:var(--text-muted); }
-        .order-card-status { text-align:right; }
-        .order-card-status .date { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
-        footer { background:var(--darker); border-top:1px solid var(--border); padding:60px 5% 30px; }
-        .footer-content { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:35px; margin-bottom:40px; }
-        .footer-section h3 { font-family:'Orbitron',sans-serif; font-size:17px; margin-bottom:18px; color:var(--primary); }
-        .footer-section p, .footer-section a { color:var(--text-muted); text-decoration:none; line-height:2; transition:color 0.3s; font-size:14px; }
-        .footer-section a:hover { color:var(--primary); }
-        .social-links { display:flex; gap:12px; margin-top:12px; }
-        .social-links a { width:42px; height:42px; background:var(--card); border:1px solid var(--border); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; transition:all 0.3s; color:var(--text-muted); text-decoration:none; }
-        .social-links a:hover { background:var(--primary); border-color:var(--primary); color:white; transform:translateY(-3px); }
-        .footer-bottom { text-align:center; padding-top:30px; border-top:1px solid var(--border); color:var(--text-muted); font-size:13px; }
-        .live-chat { position:fixed; bottom:25px; right:25px; width:55px; height:55px; background:linear-gradient(135deg,#25d366,#128c7e); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; color:white; cursor:pointer; box-shadow:0 5px 20px rgba(37,211,102,0.4); transition:all 0.3s; z-index:999; text-decoration:none; }
-        .live-chat:hover { transform:scale(1.1); box-shadow:0 8px 30px rgba(37,211,102,0.5); }
-        .fade-in { opacity:0; transform:translateY(30px); transition:all 0.6s ease; }
-        .fade-in.visible { opacity:1; transform:translateY(0); }
-        .payment-info { background:var(--dark); border:1px solid var(--border); border-radius:12px; padding:20px; margin-top:15px; margin-bottom:15px; }
-        .payment-info h4 { font-family:'Orbitron',sans-serif; font-size:14px; color:var(--primary); margin-bottom:15px; }
-        .payment-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px; }
-        .payment-row:last-child { border-bottom:none; }
-        .payment-row strong { color:var(--text); }
-        .file-upload { position:relative; }
-        .file-upload input[type="file"] { position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; }
-        .file-upload-label { display:block; padding:14px; background:var(--dark); border:2px dashed var(--border); border-radius:10px; text-align:center; color:var(--text-muted); cursor:pointer; transition:all 0.3s; }
-        .file-upload-label:hover { border-color:var(--primary); color:var(--primary); }
-        .file-upload-label.has-file { border-color:var(--success); color:var(--success); background:rgba(0,208,132,0.05); }
-        .receipt-preview { max-width:100%; max-height:200px; border-radius:10px; margin-top:10px; border:1px solid var(--border); }
-        .receipt-modal-img { max-width:100%; max-height:70vh; border-radius:12px; display:block; margin:0 auto; }
-        @media(max-width:768px) {
-            .nav-links { display:none; position:absolute; top:70px; left:0; width:100%; background:var(--dark); flex-direction:column; padding:20px; border-bottom:1px solid var(--border); }
-            .nav-links.active { display:flex; }
-            .mobile-menu-btn { display:block; }
-            .hero-stats { gap:30px; }
-            .offer-card { flex-direction:column; text-align:center; }
-            .modal { padding:25px; margin:10px; }
-            .form-row { grid-template-columns:1fr; }
-            .admin-stats { grid-template-columns:repeat(2,1fr); }
-            .order-card { flex-direction:column; text-align:center; }
-            .order-card-status { text-align:center; }
-            .membership-grid { grid-template-columns:1fr; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Kakashi Topup Store | Free Fire Diamonds</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --primary:#ff1a1a;
+    --primary-dark:#b30000;
+    --accent:#ffcc00;
+    --dark:#080808;
+    --dark2:#111111;
+    --card:#171717;
+    --card2:#202020;
+    --text:#ffffff;
+    --muted:#aaaaaa;
+    --success:#19d66b;
+    --warning:#ffb000;
+    --danger:#ff3030;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Rajdhani',sans-serif;
+    background:
+        radial-gradient(circle at top right,rgba(255,0,0,.15),transparent 35%),
+        radial-gradient(circle at bottom left,rgba(255,204,0,.08),transparent 30%),
+        var(--dark);
+    color:var(--text);
+    min-height:100vh;
+}
+
+button,input,select,textarea{
+    font-family:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.hidden{
+    display:none!important;
+}
+
+/* ================= NAVBAR ================= */
+
+nav{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:rgba(5,5,5,.95);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.nav-container{
+    width:min(1400px,94%);
+    margin:auto;
+    min-height:75px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-decoration:none;
+    color:white;
+}
+
+.logo-icon{
+    width:45px;
+    height:45px;
+    border-radius:12px;
+    display:grid;
+    place-items:center;
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    box-shadow:0 0 25px rgba(255,0,0,.35);
+    font-size:23px;
+}
+
+.logo-text{
+    font-family:'Orbitron',sans-serif;
+    font-size:20px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+
+.logo-text span{
+    color:var(--primary);
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:25px;
+    list-style:none;
+}
+
+.nav-links a{
+    color:#ddd;
+    text-decoration:none;
+    font-weight:600;
+    transition:.2s;
+}
+
+.nav-links a:hover{
+    color:var(--accent);
+}
+
+.whatsapp-btn{
+    background:#20c863;
+    color:white!important;
+    padding:10px 16px;
+    border-radius:10px;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    width:min(1400px,94%);
+    margin:50px auto 30px;
+    min-height:350px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:25px;
+    padding:50px;
+    position:relative;
+    overflow:hidden;
+    background:
+        linear-gradient(90deg,rgba(0,0,0,.95),rgba(0,0,0,.55)),
+        radial-gradient(circle at 80% 40%,rgba(255,0,0,.35),transparent 35%);
+}
+
+.hero:before{
+    content:"";
+    position:absolute;
+    width:450px;
+    height:450px;
+    right:-150px;
+    top:-200px;
+    border-radius:50%;
+    border:60px solid rgba(255,0,0,.08);
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+    max-width:750px;
+}
+
+.badge{
+    display:inline-block;
+    background:rgba(255,0,0,.12);
+    border:1px solid rgba(255,0,0,.35);
+    color:#ff5555;
+    padding:7px 14px;
+    border-radius:30px;
+    font-weight:700;
+    margin-bottom:18px;
+}
+
+.hero h1{
+    font-family:'Orbitron',sans-serif;
+    font-size:clamp(35px,6vw,75px);
+    line-height:1;
+    margin-bottom:20px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+}
+
+.hero p{
+    color:#ccc;
+    font-size:19px;
+    max-width:650px;
+}
+
+.hero-buttons{
+    display:flex;
+    gap:12px;
+    margin-top:30px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    border:none;
+    border-radius:11px;
+    padding:13px 22px;
+    font-size:16px;
+    font-weight:700;
+    transition:.2s;
+}
+
+.btn-primary{
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    color:white;
+    box-shadow:0 10px 30px rgba(255,0,0,.2);
+}
+
+.btn-primary:hover{
+    transform:translateY(-2px);
+}
+
+.btn-secondary{
+    background:#222;
+    color:white;
+    border:1px solid #444;
+}
+
+.btn-success{
+    background:var(--success);
+    color:#06150d;
+}
+
+.btn-danger{
+    background:var(--danger);
+    color:white;
+}
+
+/* ================= MAIN ================= */
+
+.container{
+    width:min(1400px,94%);
+    margin:50px auto;
+}
+
+.section-title{
+    font-family:'Orbitron',sans-serif;
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.section-subtitle{
+    color:#999;
+    margin-bottom:25px;
+}
+
+/* ================= PACKAGES ================= */
+
+.packages{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:18px;
+}
+
+.package{
+    background:linear-gradient(145deg,#191919,#101010);
+    border:1px solid #2b2b2b;
+    border-radius:18px;
+    padding:25px;
+    position:relative;
+    overflow:hidden;
+    transition:.25s;
+}
+
+.package:hover{
+    transform:translateY(-5px);
+    border-color:rgba(255,0,0,.6);
+    box-shadow:0 15px 40px rgba(255,0,0,.1);
+}
+
+.package .popular{
+    position:absolute;
+    top:12px;
+    right:12px;
+    background:var(--accent);
+    color:#111;
+    padding:4px 9px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:800;
+}
+
+.diamond{
+    font-size:40px;
+    margin-bottom:10px;
+}
+
+.package h3{
+    font-family:'Orbitron',sans-serif;
+    margin-bottom:5px;
+}
+
+.package .diamonds{
+    color:#53c8ff;
+    font-weight:700;
+    font-size:20px;
+}
+
+.price{
+    font-size:25px;
+    font-weight:900;
+    color:var(--accent);
+    margin:12px 0;
+}
+
+.package button{
+    width:100%;
+}
+
+/* ================= ORDER ================= */
+
+.order-section{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
+    margin-top:50px;
+}
+
+.panel{
+    background:var(--card);
+    border:1px solid #2b2b2b;
+    border-radius:20px;
+    padding:28px;
+}
+
+.panel h2{
+    font-family:'Orbitron',sans-serif;
+    margin-bottom:20px;
+}
+
+.form-group{
+    margin-bottom:16px;
+}
+
+.form-group label{
+    display:block;
+    color:#ccc;
+    margin-bottom:7px;
+    font-weight:600;
+}
+
+input,select,textarea{
+    width:100%;
+    background:#0e0e0e;
+    color:white;
+    border:1px solid #333;
+    border-radius:10px;
+    padding:13px;
+    outline:none;
+    font-size:16px;
+}
+
+input:focus,select:focus,textarea:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(255,0,0,.08);
+}
+
+textarea{
+    resize:vertical;
+    min-height:90px;
+}
+
+.payment-info{
+    background:#101010;
+    border:1px solid #292929;
+    border-radius:12px;
+    padding:15px;
+    margin-top:15px;
+}
+
+.payment-info strong{
+    color:var(--accent);
+}
+
+.notice{
+    background:rgba(255,204,0,.07);
+    border:1px solid rgba(255,204,0,.2);
+    color:#ddd;
+    padding:14px;
+    border-radius:10px;
+    margin-bottom:18px;
+}
+
+/* ================= ORDER RESULT ================= */
+
+.result-box{
+    background:#101010;
+    border:1px solid #303030;
+    border-radius:14px;
+    padding:20px;
+    margin-top:20px;
+}
+
+.order-number{
+    font-family:'Orbitron',sans-serif;
+    color:var(--accent);
+    font-size:22px;
+}
+
+/* ================= ADMIN ================= */
+
+.admin-page{
+    width:min(1450px,95%);
+    margin:30px auto;
+}
+
+.admin-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-bottom:25px;
+}
+
+.admin-header h1{
+    font-family:'Orbitron',sans-serif;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.stat{
+    background:var(--card);
+    border:1px solid #2b2b2b;
+    border-radius:15px;
+    padding:20px;
+}
+
+.stat small{
+    color:#999;
+}
+
+.stat strong{
+    display:block;
+    font-family:'Orbitron',sans-serif;
+    font-size:28px;
+    margin-top:7px;
+}
+
+.orders-table-wrap{
+    background:var(--card);
+    border:1px solid #2b2b2b;
+    border-radius:18px;
+    overflow:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1100px;
+}
+
+th,td{
+    padding:14px;
+    text-align:left;
+    border-bottom:1px solid #292929;
+}
+
+th{
+    background:#101010;
+    color:var(--accent);
+    font-family:'Orbitron',sans-serif;
+    font-size:13px;
+}
+
+td{
+    color:#ddd;
+}
+
+.status{
+    padding:5px 9px;
+    border-radius:20px;
+    font-weight:700;
+    font-size:12px;
+}
+
+.status-pending{
+    background:rgba(255,176,0,.15);
+    color:#ffb000;
+}
+
+.status-processing{
+    background:rgba(0,170,255,.15);
+    color:#45baff;
+}
+
+.status-completed{
+    background:rgba(25,214,107,.15);
+    color:#19d66b;
+}
+
+.status-cancelled{
+    background:rgba(255,48,48,.15);
+    color:#ff5555;
+}
+
+/* ================= LOGIN ================= */
+
+.login-wrap{
+    width:min(450px,92%);
+    margin:90px auto;
+}
+
+.login-card{
+    background:var(--card);
+    border:1px solid #2b2b2b;
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+
+.login-card h1{
+    font-family:'Orbitron',sans-serif;
+    margin-bottom:8px;
+}
+
+.login-card p{
+    color:#999;
+    margin-bottom:25px;
+}
+
+/* ================= TOAST ================= */
+
+.toast-container{
+    position:fixed;
+    right:20px;
+    top:90px;
+    z-index:9999;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.toast{
+    background:#202020;
+    border-left:4px solid var(--primary);
+    border-radius:10px;
+    padding:15px 18px;
+    min-width:270px;
+    box-shadow:0 15px 40px rgba(0,0,0,.4);
+    animation:slideIn .25s ease;
+}
+
+.toast.success{
+    border-left-color:var(--success);
+}
+
+.toast.error{
+    border-left-color:var(--danger);
+}
+
+@keyframes slideIn{
+    from{
+        transform:translateX(120%);
+        opacity:0;
+    }
+    to{
+        transform:translateX(0);
+        opacity:1;
+    }
+}
+
+/* ================= FOOTER ================= */
+
+footer{
+    border-top:1px solid #222;
+    margin-top:80px;
+    padding:30px 5%;
+    text-align:center;
+    color:#777;
+}
+
+footer strong{
+    color:white;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:800px){
+
+    .nav-links{
+        display:none;
+    }
+
+    .hero{
+        padding:30px 22px;
+    }
+
+    .order-section{
+        grid-template-columns:1fr;
+    }
+
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .hero h1{
+        font-size:40px;
+    }
+}
+
+@media(max-width:500px){
+
+    .stats{
+        grid-template-columns:1fr;
+    }
+
+    .logo-text{
+        font-size:15px;
+    }
+
+    .whatsapp-btn{
+        display:none;
+    }
+}
+</style>
 </head>
+
 <body>
-    <div id="particles"></div>
-    <div class="toast-container" id="toastContainer"></div>
 
-    <nav>
-        <div class="nav-container">
-            <a href="#" class="logo" onclick="showSection('home'); return false;">
-                <div class="logo-icon">⚡</div>
-                <div class="logo-text">KAKASHI<span>TOPUP</span></div>
+<!-- =====================================================
+     CUSTOMER STORE
+===================================================== -->
+
+<div id="customerPage">
+
+<nav>
+    <div class="nav-container">
+
+        <a href="#" class="logo">
+            <div class="logo-icon">🔥</div>
+
+            <div class="logo-text">
+                KAKASHI <span>TOPUP</span>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="#packages">Packages</a></li>
+            <li><a href="#order">Order</a></li>
+            <li>
+                <a class="whatsapp-btn"
+                   href="https://wa.me/94766559214"
+                   target="_blank">
+                    WhatsApp
+                </a>
+            </li>
+        </ul>
+
+    </div>
+</nav>
+
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="badge">
+            🇸🇬 Free Fire Singapore Server
+        </div>
+
+        <h1>
+            KAKASHI <span>TOPUP</span>
+            STORE
+        </h1>
+
+        <p>
+            Fast & trusted Free Fire Diamonds top-up service.
+            Choose your package and place your order easily.
+        </p>
+
+        <div class="hero-buttons">
+
+            <a href="#packages"
+               class="btn btn-primary">
+                💎 View Packages
             </a>
-            <ul class="nav-links" id="navLinks">
-                <li><a href="#home" onclick="showSection('home'); return false;">Home</a></li>
-                <li><a href="#memberships" onclick="showSection('memberships'); return false;">Memberships</a></li>
-                <li><a href="#offers" onclick="showSection('offers'); return false;">Offers</a></li>
-                <li><a href="#how-to-order" onclick="showSection('how-to-order'); return false;">How to Order</a></li>
-                <li><a href="#contact" onclick="showSection('contact'); return false;">Contact</a></li>
-                <li id="adminNavItem" style="display:none;"><a href="javascript:void(0)" onclick="openAdminModal(); return false;" style="color:var(--primary);"><i class="fas fa-shield-alt"></i> Admin</a></li>
-            </ul>
-            <div class="user-menu" id="userMenu">
-                <button class="btn-login" id="loginBtn" onclick="openAuthModal()">Login</button>
-                <div class="user-avatar" id="userAvatar" style="display:none;" onclick="toggleUserDropdown()">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="dropdown-menu" id="userDropdown"></div>
-            </div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+
+            <a href="https://wa.me/94766559214"
+               target="_blank"
+               class="btn btn-success">
+                WhatsApp Us
+            </a>
+
         </div>
-    </nav>
 
-    <div id="mainContent">
-        <section class="hero" id="home">
-            <div class="hero-content">
-                <div class="hero-badge"><i class="fas fa-fire"></i> #1 Free Fire Top-Up Store - Sri Lanka</div>
-                <h1>Power Up Your<br><span class="highlight">Free Fire</span> Game</h1>
-                <p>Fast diamond top-ups, weekly and monthly memberships at the best prices in Sri Lanka. Secure payments via EZ Cash and more.</p>
-                <div class="hero-buttons">
-                    <a href="#memberships" class="btn btn-primary" onclick="showSection('memberships'); return false;"><i class="fas fa-gem"></i> Buy Now</a>
-                    <a href="#how-to-order" class="btn btn-secondary" onclick="showSection('how-to-order'); return false;"><i class="fas fa-info-circle"></i> How It Works</a>
-                </div>
-                <div class="trust-badges">
-                    <div class="trust-badge"><i class="fas fa-shield-alt"></i><span>100% Secure</span></div>
-                    <div class="trust-badge"><i class="fas fa-bolt"></i><span>Instant Delivery</span></div>
-                    <div class="trust-badge"><i class="fas fa-headset"></i><span>24/7 Support</span></div>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat"><div class="stat-number" data-count="5000">0</div><div class="stat-label">Happy Gamers</div></div>
-                    <div class="stat"><div class="stat-number" data-count="99">0</div><div class="stat-label">% Satisfaction</div></div>
-                    <div class="stat"><div class="stat-number" data-count="5">0</div><div class="stat-label">Min Delivery</div></div>
-                </div>
-            </div>
-        </section>
-
-        <section id="memberships">
-            <div class="section-header fade-in">
-                <h2>Free Fire <span>Memberships</span></h2>
-                <div class="section-line"></div>
-                <p>Choose your package and get instant diamonds to your account</p>
-            </div>
-            <div class="membership-grid">
-                <div class="membership-card fade-in" onclick="openOrderModal('Weekly Lite','Rs. 150','20 Diamonds + Bonus')">
-                    <div class="membership-icon"><i class="fas fa-gem"></i></div>
-                    <h3>Weekly Lite</h3>
-                    <div class="price">Rs. 150</div>
-                    <ul class="membership-features">
-                        <li><i class="fas fa-check"></i> 20 Diamonds</li>
-                        <li><i class="fas fa-check"></i> Weekly Validity</li>
-                        <li><i class="fas fa-check"></i> Fast Delivery</li>
-                        <li><i class="fas fa-check"></i> WhatsApp Support</li>
-                    </ul>
-                    <button class="btn-order">Order Now</button>
-                </div>
-
-                <div class="membership-card featured fade-in" onclick="openOrderModal('Weekly','Rs. 595','200 Diamonds + Bonus')">
-                    <div class="popular-badge">Popular</div>
-                    <div class="membership-icon"><i class="fas fa-crown"></i></div>
-                    <h3>Weekly</h3>
-                    <div class="price">Rs. 595</div>
-                    <ul class="membership-features">
-                        <li><i class="fas fa-check"></i> 200 Diamonds</li>
-                        <li><i class="fas fa-check"></i> Weekly Validity</li>
-                        <li><i class="fas fa-check"></i> Fast Delivery</li>
-                        <li><i class="fas fa-check"></i> WhatsApp Support</li>
-                        <li><i class="fas fa-check"></i> Priority Queue</li>
-                    </ul>
-                    <button class="btn-order">Order Now</button>
-                </div>
-
-                <div class="membership-card fade-in" onclick="openOrderModal('Monthly','Rs. 2,800','1,000 Diamonds + Bonus')">
-                    <div class="membership-icon"><i class="fas fa-calendar-alt"></i></div>
-                    <h3>Monthly</h3>
-                    <div class="price">Rs. 2,800</div>
-                    <ul class="membership-features">
-                        <li><i class="fas fa-check"></i> 1,000 Diamonds</li>
-                        <li><i class="fas fa-check"></i> Monthly Validity</li>
-                        <li><i class="fas fa-check"></i> Fast Delivery</li>
-                        <li><i class="fas fa-check"></i> WhatsApp Support</li>
-                        <li><i class="fas fa-check"></i> Best Value</li>
-                    </ul>
-                    <button class="btn-order">Order Now</button>
-                </div>
-
-                <div class="membership-card fade-in" onclick="openOrderModal('VIP','Rs. 3,395','1,200 Diamonds + Bonus')">
-                    <div class="membership-icon"><i class="fas fa-star"></i></div>
-                    <h3>VIP</h3>
-                    <div class="price">Rs. 3,395</div>
-                    <ul class="membership-features">
-                        <li><i class="fas fa-check"></i> 1,200 Diamonds</li>
-                        <li><i class="fas fa-check"></i> Monthly Validity</li>
-                        <li><i class="fas fa-check"></i> Fast Delivery</li>
-                        <li><i class="fas fa-check"></i> VIP Support</li>
-                        <li><i class="fas fa-check"></i> Exclusive Deals</li>
-                    </ul>
-                    <button class="btn-order">Order Now</button>
-                </div>
-
-                <div class="membership-card popular fade-in" onclick="openOrderModal('SVIP','Rs. 5,600','1,800 Diamonds + Bonus')">
-                    <div class="membership-icon"><i class="fas fa-crown"></i></div>
-                    <h3>SVIP</h3>
-                    <div class="price">Rs. 5,600</div>
-                    <ul class="membership-features">
-                        <li><i class="fas fa-check"></i> 1,800 Diamonds</li>
-                        <li><i class="fas fa-check"></i> Monthly Validity</li>
-                        <li><i class="fas fa-check"></i> Instant Delivery</li>
-                        <li><i class="fas fa-check"></i> 24/7 Priority Support</li>
-                        <li><i class="fas fa-check"></i> Mega Bundle</li>
-                    </ul>
-                    <button class="btn-order">Order Now</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="offers">
-            <div class="section-header fade-in"><h2>Special <span>Offers</span></h2><div class="section-line"></div><p>Limited time deals and exclusive bundles</p></div>
-            <div class="offers-grid">
-                <div class="offer-card fade-in" onclick="openOrderModal('Elite Pass','Rs. 1,500','Elite Pass Bundle')"><div class="offer-icon"><i class="fas fa-star"></i></div><div class="offer-content"><h3>Elite Pass</h3><p>Unlock the current season Elite Pass with exclusive character skins, weapons, and more.</p><span class="offer-badge">BEST VALUE</span></div></div>
-                <div class="offer-card fade-in" onclick="openOrderModal('Elite Pass Plus','Rs. 2,500','Elite Pass Plus Bundle')"><div class="offer-icon"><i class="fas fa-crown"></i></div><div class="offer-content"><h3>Elite Pass Plus</h3><p>Get Elite Pass with 25 levels instantly unlocked. Premium rewards from day one.</p><span class="offer-badge">POPULAR</span></div></div>
-                <div class="offer-card fade-in" onclick="openOrderModal('Level Up Pass','Rs. 800','Level Up Pass Bundle')"><div class="offer-icon"><i class="fas fa-level-up-alt"></i></div><div class="offer-content"><h3>Level Up Pass</h3><p>Get exclusive rewards as you level up your account. Includes rare skins and emotes.</p><span class="offer-badge">LIMITED</span></div></div>
-                <div class="offer-card fade-in" onclick="openOrderModal('Special Bundle','Rs. 3,000','Special Mega Bundle')"><div class="offer-icon"><i class="fas fa-gift"></i></div><div class="offer-content"><h3>Special Mega Bundle</h3><p>Massive bundle with rare skins and exclusive items. Best for serious players.</p><span class="offer-badge">MEGA DEAL</span></div></div>
-            </div>
-        </section>
-
-        <section class="how-to-order" id="how-to-order">
-            <div class="section-header fade-in"><h2>How to <span>Order</span></h2><div class="section-line"></div><p>Get your diamonds in 4 simple steps</p></div>
-            <div class="steps-grid">
-                <div class="step-card fade-in"><div class="step-number">1</div><h3>Choose Package</h3><p>Select your desired membership package from our store</p></div>
-                <div class="step-card fade-in"><div class="step-number">2</div><h3>Enter UID</h3><p>Provide your Free Fire Player UID and select your server region</p></div>
-                <div class="step-card fade-in"><div class="step-number">3</div><h3>Make Payment</h3><p>Pay via EZ Cash or bank transfer and upload the receipt</p></div>
-                <div class="step-card fade-in"><div class="step-number">4</div><h3>Get Diamonds</h3><p>Receive your diamonds instantly after payment confirmation</p></div>
-            </div>
-        </section>
-
-        <section id="contact">
-            <div class="section-header fade-in"><h2>Contact <span>Us</span></h2><div class="section-line"></div><p>Have questions? We are here to help 24/7</p></div>
-            <div class="offers-grid" style="max-width:800px;">
-                <div class="offer-card fade-in" style="justify-content:center;"><div class="offer-icon"><i class="fab fa-whatsapp"></i></div><div class="offer-content"><h3>WhatsApp Support</h3><p>Fastest response time for orders and inquiries</p><a href="https://wa.me/94766559214" target="_blank" class="offer-badge" style="text-decoration:none;display:inline-block;">076 655 9214</a></div></div>
-                <div class="offer-card fade-in" style="justify-content:center;"><div class="offer-icon"><i class="fab fa-instagram"></i></div><div class="offer-content"><h3>Instagram</h3><p>Follow us for updates and exclusive deals</p><a href="#" class="offer-badge" style="text-decoration:none;display:inline-block;">@kakashitopup</a></div></div>
-            </div>
-        </section>
     </div>
 
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section"><h3>Kakashi Topup</h3><p>Your trusted Free Fire diamond store in Sri Lanka. Fast, secure, and reliable top-up services.</p><div class="social-links"><a href="https://wa.me/94766559214" target="_blank"><i class="fab fa-whatsapp"></i></a><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-facebook"></i></a><a href="#"><i class="fab fa-telegram"></i></a></div></div>
-            <div class="footer-section"><h3>Quick Links</h3><a href="#memberships" onclick="showSection('memberships'); return false;">Memberships</a><br><a href="#offers" onclick="showSection('offers'); return false;">Special Offers</a><br><a href="#how-to-order" onclick="showSection('how-to-order'); return false;">How to Order</a><br><a href="#contact" onclick="showSection('contact'); return false;">Contact Us</a></div>
-            <div class="footer-section"><h3>Support</h3><a href="#">FAQ</a><br><a href="#">Terms of Service</a><br><a href="#">Privacy Policy</a><br><a href="#">Refund Policy</a></div>
-            <div class="footer-section"><h3>Payment Methods</h3><p><i class="fas fa-mobile-alt"></i> EZ Cash - 076 280 2142</p><p><i class="fas fa-university"></i> Bank Transfer</p><p><i class="fas fa-money-bill-wave"></i> Cash Deposit</p><p><i class="fas fa-credit-card"></i> Card Payment</p></div>
-        </div>
-        <div class="footer-bottom"><p>2026 Kakashi Topup Store. All rights reserved. Not affiliated with Garena.</p></div>
-    </footer>
+</section>
 
-    <a href="https://wa.me/94766559214" target="_blank" class="live-chat"><i class="fab fa-whatsapp"></i></a>
 
-    <!-- Auth Modal -->
-    <div class="modal-overlay" id="authModal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeAuthModal()"><i class="fas fa-times"></i></button>
-            <h2>Member <span>Access</span></h2>
-            <div class="auth-tabs">
-                <button class="auth-tab active" onclick="switchAuthTab('login', this)">Login</button>
-                <button class="auth-tab" onclick="switchAuthTab('register', this)">Register</button>
+<!-- PACKAGES -->
+
+<section class="container" id="packages">
+
+    <h2 class="section-title">
+        Diamond Packages
+    </h2>
+
+    <p class="section-subtitle">
+        Select your preferred Free Fire Diamond package.
+    </p>
+
+    <div class="packages">
+
+        <div class="package">
+
+            <div class="diamond">💎</div>
+
+            <h3>100 Diamonds</h3>
+
+            <div class="diamonds">
+                100 💎
             </div>
-            <div class="auth-panel active" id="loginPanel">
-                <div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
-                <div class="form-group"><label><i class="fas fa-lock"></i> Password</label><input type="password" id="loginPassword" placeholder="Enter password"></div>
-                <button class="btn btn-primary" style="width:100%;" onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
-                <p style="text-align:center;margin-top:15px;color:var(--text-muted);font-size:12px;"><i class="fas fa-info-circle"></i> Admin: admin@kakashi.com / admin123</p>
+
+            <div class="price">
+                Rs. 300
             </div>
-            <div class="auth-panel" id="registerPanel">
-                <div class="form-row">
-                    <div class="form-group"><label><i class="fas fa-user"></i> First Name</label><input type="text" id="regFirstName" placeholder="John"></div>
-                    <div class="form-group"><label><i class="fas fa-user"></i> Last Name</label><input type="text" id="regLastName" placeholder="Doe"></div>
-                </div>
-                <div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="regEmail" placeholder="your@email.com"></div>
-                <div class="form-group"><label><i class="fab fa-whatsapp"></i> WhatsApp Number</label><input type="text" id="regWhatsapp" placeholder="94766559214"></div>
-                <div class="form-group"><label><i class="fas fa-lock"></i> Password</label><input type="password" id="regPassword" placeholder="Min 6 characters"></div>
-                <div class="form-group"><label><i class="fas fa-lock"></i> Confirm Password</label><input type="password" id="regConfirmPassword" placeholder="Confirm password"></div>
-                <button class="btn btn-primary" style="width:100%;" onclick="handleRegister()"><i class="fas fa-user-plus"></i> Create Account</button>
-            </div>
+
+            <button
+                class="btn btn-primary"
+                onclick="selectPackage('100 Diamonds','Rs. 300')">
+                Order Now
+            </button>
+
         </div>
+
+
+        <div class="package">
+
+            <div class="popular">
+                POPULAR
+            </div>
+
+            <div class="diamond">💎</div>
+
+            <h3>310 Diamonds</h3>
+
+            <div class="diamonds">
+                310 💎
+            </div>
+
+            <div class="price">
+                Rs. 800
+            </div>
+
+            <button
+                class="btn btn-primary"
+                onclick="selectPackage('310 Diamonds','Rs. 800')">
+                Order Now
+            </button>
+
+        </div>
+
+
+        <div class="package">
+
+            <div class="diamond">💎</div>
+
+            <h3>520 Diamonds</h3>
+
+            <div class="diamonds">
+                520 💎
+            </div>
+
+            <div class="price">
+                Rs. 1,250
+            </div>
+
+            <button
+                class="btn btn-primary"
+                onclick="selectPackage('520 Diamonds','Rs. 1,250')">
+                Order Now
+            </button>
+
+        </div>
+
+
+        <div class="package">
+
+            <div class="diamond">💎</div>
+
+            <h3>1060 Diamonds</h3>
+
+            <div class="diamonds">
+                1060 💎
+            </div>
+
+            <div class="price">
+                Rs. 2,400
+            </div>
+
+            <button
+                class="btn btn-primary"
+                onclick="selectPackage('1060 Diamonds','Rs. 2,400')">
+                Order Now
+            </button>
+
+        </div>
+
+
+        <div class="package">
+
+            <div class="diamond">💎</div>
+
+            <h3>2180 Diamonds</h3>
+
+            <div class="diamonds">
+                2180 💎
+            </div>
+
+            <div class="price">
+                Rs. 4,500
+            </div>
+
+            <button
+                class="btn btn-primary"
+                onclick="selectPackage('2180 Diamonds','Rs. 4,500')">
+                Order Now
+            </button>
+
+        </div>
+
+
+        <div class="package">
+
+            <div class="diamond">💎</div>
+
+            <h3>5600 Diamonds</h3>
+
+            <div class="diamonds">
+                5600 💎
+            </div>
+
+            <div class="price">
+                Rs. 10,500
+            </div>
+
+            <button
+                class="btn btn-primary"
+                onclick="selectPackage('5600 Diamonds','Rs. 10,500')">
+                Order Now
+            </button>
+
+        </div>
+
     </div>
 
-    <!-- Order Modal -->
-    <div class="modal-overlay" id="orderModal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeOrderModal()"><i class="fas fa-times"></i></button>
-            <h2>Complete Your <span>Order</span></h2>
-            <div class="order-summary">
-                <h4><i class="fas fa-shopping-cart"></i> Order Summary</h4>
-                <div class="summary-row"><span>Package:</span><span id="modalPackage">-</span></div>
-                <div class="summary-row"><span>Bonus:</span><span id="modalBonus">-</span></div>
-                <div class="summary-row total"><span>Total:</span><span id="modalPrice">-</span></div>
+</section>
+
+
+<!-- ORDER -->
+
+<section class="container" id="order">
+
+    <div class="order-section">
+
+        <div class="panel">
+
+            <h2>Place Your Order</h2>
+
+            <div class="notice">
+                ⚠️ Please enter your Free Fire UID correctly.
+                Wrong UID may cause the top-up to be sent to the wrong account.
             </div>
-            <div class="form-group"><label><i class="fas fa-user"></i> Free Fire UID</label><input type="text" id="playerUid" placeholder="Enter your Player UID" maxlength="12"></div>
-            <div class="form-row">
-                <div class="form-group"><label><i class="fas fa-server"></i> Server Region</label><select id="serverRegion"><option value="">Select Server</option><option value="NA">North America</option><option value="SA">South America</option><option value="EU">Europe</option><option value="ASIA">Asia</option><option value="ME">Middle East</option><option value="AF">Africa</option></select></div>
-                <div class="form-group"><label><i class="fas fa-gamepad"></i> In-Game Name</label><input type="text" id="playerName" placeholder="Your FF Name"></div>
-            </div>
-            <div id="guestContactFields">
-                <div class="form-row">
-                    <div class="form-group"><label><i class="fab fa-whatsapp"></i> WhatsApp</label><input type="text" id="guestWhatsapp" placeholder="94766559214"></div>
-                    <div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="guestEmail" placeholder="For notifications"></div>
+
+
+            <form id="orderForm">
+
+                <div class="form-group">
+
+                    <label>
+                        Your Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="customerName"
+                        placeholder="Enter your name"
+                        required>
+
                 </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Free Fire UID
+                    </label>
+
+                    <input
+                        type="text"
+                        id="ffUid"
+                        placeholder="Enter Free Fire UID"
+                        required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        WhatsApp Number
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="phone"
+                        placeholder="07XXXXXXXX"
+                        required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Diamond Package
+                    </label>
+
+                    <select id="package" required>
+
+                        <option value="">
+                            Select Package
+                        </option>
+
+                        <option value="100 Diamonds|Rs. 300">
+                            100 Diamonds - Rs. 300
+                        </option>
+
+                        <option value="310 Diamonds|Rs. 800">
+                            310 Diamonds - Rs. 800
+                        </option>
+
+                        <option value="520 Diamonds|Rs. 1,250">
+                            520 Diamonds - Rs. 1,250
+                        </option>
+
+                        <option value="1060 Diamonds|Rs. 2,400">
+                            1060 Diamonds - Rs. 2,400
+                        </option>
+
+                        <option value="2180 Diamonds|Rs. 4,500">
+                            2180 Diamonds - Rs. 4,500
+                        </option>
+
+                        <option value="5600 Diamonds|Rs. 10,500">
+                            5600 Diamonds - Rs. 10,500
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Payment Method
+                    </label>
+
+                    <select id="paymentMethod" required>
+
+                        <option value="">
+                            Select Payment Method
+                        </option>
+
+                        <option value="Bank Transfer">
+                            Bank Transfer
+                        </option>
+
+                        <option value="WhatsApp Payment">
+                            WhatsApp Payment
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Additional Note
+                    </label>
+
+                    <textarea
+                        id="note"
+                        placeholder="Optional message..."></textarea>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    id="submitOrder"
+                    class="btn btn-primary"
+                    style="width:100%;">
+
+                    🔥 PLACE ORDER
+
+                </button>
+
+            </form>
+
+
+            <div id="orderResult"
+                 class="result-box hidden">
+
+                <div>
+                    Order successfully submitted!
+                </div>
+
+                <br>
+
+                <div>
+                    Your Order ID:
+                </div>
+
+                <div class="order-number"
+                     id="generatedOrderId">
+                </div>
+
+                <br>
+
+                <div>
+                    Please contact us on WhatsApp after payment.
+                </div>
+
+                <br>
+
+                <a
+                    id="orderWhatsapp"
+                    target="_blank"
+                    class="btn btn-success">
+
+                    💬 Send Order on WhatsApp
+
+                </a>
+
             </div>
+
+        </div>
+
+
+        <div class="panel">
+
+            <h2>How It Works</h2>
+
+            <div style="line-height:2;color:#ccc;">
+
+                <p>
+                    <strong style="color:#ffcc00;">
+                        01.
+                    </strong>
+                    Select your Diamond package.
+                </p>
+
+                <p>
+                    <strong style="color:#ffcc00;">
+                        02.
+                    </strong>
+                    Enter your Free Fire UID.
+                </p>
+
+                <p>
+                    <strong style="color:#ffcc00;">
+                        03.
+                    </strong>
+                    Submit your order.
+                </p>
+
+                <p>
+                    <strong style="color:#ffcc00;">
+                        04.
+                    </strong>
+                    Complete your payment.
+                </p>
+
+                <p>
+                    <strong style="color:#ffcc00;">
+                        05.
+                    </strong>
+                    Send payment proof through WhatsApp.
+                </p>
+
+            </div>
+
+
             <div class="payment-info">
-                <h4><i class="fas fa-money-bill-wave"></i> Payment Details</h4>
-                <div class="payment-row"><span>Method:</span><strong>EZ Cash / Bank Transfer</strong></div>
-                <div class="payment-row"><span>EZ Cash No:</span><strong>076 280 2142</strong></div>
-                <div class="payment-row"><span>WhatsApp:</span><strong>076 655 9214</strong></div>
+
+                <strong>
+                    WhatsApp:
+                </strong>
+
+                <br>
+
+                076 655 9214
+
             </div>
-            <div class="form-group">
-                <label><i class="fas fa-receipt"></i> Payment Receipt (Screenshot)</label>
-                <div class="file-upload">
-                    <input type="file" id="receiptFile" accept="image/*" onchange="handleReceiptUpload(this)">
-                    <div class="file-upload-label" id="receiptLabel" onclick="document.getElementById('receiptFile').click()">
-                        <i class="fas fa-cloud-upload-alt" style="font-size:24px;margin-bottom:8px;display:block;"></i>
-                        Click to upload payment receipt screenshot
-                    </div>
+
+
+            <div class="payment-info">
+
+                <strong>
+                    Server:
+                </strong>
+
+                <br>
+
+                Free Fire Singapore Server 🇸🇬
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<footer>
+
+    <strong>Kakashi Topup Store</strong>
+    <br>
+    Free Fire Diamonds Top-up
+    <br><br>
+    © 2026 Kakashi Topup Store
+
+</footer>
+
+</div>
+
+
+<!-- =====================================================
+     ADMIN LOGIN
+===================================================== -->
+
+<div id="adminLoginPage" class="hidden">
+
+    <div class="login-wrap">
+
+        <div class="login-card">
+
+            <h1>ADMIN LOGIN</h1>
+
+            <p>
+                Kakashi Topup Store Management Panel
+            </p>
+
+
+            <form id="loginForm">
+
+                <div class="form-group">
+
+                    <label>
+                        Admin Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="adminEmail"
+                        placeholder="admin@example.com"
+                        required>
+
                 </div>
-                <img id="receiptPreview" class="receipt-preview" style="display:none;" />
-            </div>
-            <button class="btn btn-primary" style="width:100%;margin-top:15px;margin-bottom:10px;" onclick="placeOrder()"><i class="fas fa-paper-plane"></i> Place Order</button>
-            <p style="text-align:center;color:var(--text-muted);font-size:12px;"><i class="fas fa-info-circle"></i> Pay to EZ Cash 0762802142 and upload the receipt screenshot</p>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="adminPassword"
+                        placeholder="Enter password"
+                        required>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    style="width:100%;">
+
+                    LOGIN
+
+                </button>
+
+            </form>
+
+            <br>
+
+            <button
+                class="btn btn-secondary"
+                onclick="goStore()"
+                style="width:100%;">
+
+                ← Back To Store
+
+            </button>
+
         </div>
+
     </div>
 
-    <!-- Receipt View Modal -->
-    <div class="modal-overlay" id="receiptModal">
-        <div class="modal" style="max-width:600px;">
-            <button class="modal-close" onclick="closeModal('receiptModal')"><i class="fas fa-times"></i></button>
-            <h2>Payment <span>Receipt</span></h2>
-            <img id="receiptModalImg" class="receipt-modal-img" src="" alt="Receipt" />
-            <div style="text-align:center;margin-top:15px;">
-                <a id="receiptDownloadLink" href="" download="receipt.png" class="btn btn-primary" style="padding:10px 25px;font-size:14px;"><i class="fas fa-download"></i> Download Receipt</a>
+</div>
+
+
+<!-- =====================================================
+     ADMIN DASHBOARD
+===================================================== -->
+
+<div id="adminDashboard" class="hidden">
+
+    <div class="admin-page">
+
+        <div class="admin-header">
+
+            <div>
+
+                <h1>
+                    🔥 Kakashi Admin Panel
+                </h1>
+
+                <p style="color:#888;">
+                    Manage your Free Fire topup orders
+                </p>
+
             </div>
+
+
+            <div>
+
+                <button
+                    class="btn btn-secondary"
+                    onclick="goStore()">
+
+                    Store
+
+                </button>
+
+                <button
+                    class="btn btn-danger"
+                    onclick="logoutAdmin()">
+
+                    Logout
+
+                </button>
+
+            </div>
+
         </div>
+
+
+        <div class="stats">
+
+            <div class="stat">
+
+                <small>
+                    Total Orders
+                </small>
+
+                <strong id="totalOrders">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="stat">
+
+                <small>
+                    Pending
+                </small>
+
+                <strong id="pendingOrders">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="stat">
+
+                <small>
+                    Processing
+                </small>
+
+                <strong id="processingOrders">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="stat">
+
+                <small>
+                    Completed
+                </small>
+
+                <strong id="completedOrders">
+                    0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="orders-table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>FF UID</th>
+                        <th>Phone</th>
+                        <th>Package</th>
+                        <th>Payment</th>
+                        <th>Note</th>
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="ordersBody">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
     </div>
 
-    <!-- Member Dashboard Modal -->
-    <div class="modal-overlay" id="memberModal">
-        <div class="modal wide">
-            <button class="modal-close" onclick="closeModal('memberModal')"><i class="fas fa-times"></i></button>
-            <h2>My <span>Dashboard</span></h2>
-            <div class="admin-stats">
-                <div class="admin-stat-card"><i class="fas fa-shopping-bag"></i><div class="number" id="memberTotalOrders">0</div><div class="label">Total Orders</div></div>
-                <div class="admin-stat-card"><i class="fas fa-check-circle"></i><div class="number" id="memberConfirmedOrders">0</div><div class="label">Confirmed</div></div>
-                <div class="admin-stat-card"><i class="fas fa-clock"></i><div class="number" id="memberPendingOrders">0</div><div class="label">Pending</div></div>
-            </div>
-            <h3 style="font-family:'Orbitron',sans-serif;font-size:15px;margin-bottom:15px;color:var(--primary);"><i class="fas fa-list"></i> My Order History</h3>
-            <div class="member-orders" id="memberOrdersList">
-                <p style="text-align:center;color:var(--text-muted);padding:40px;"><i class="fas fa-inbox" style="font-size:40px;margin-bottom:15px;display:block;"></i>No orders yet. Start shopping!</p>
-            </div>
-        </div>
-    </div>
+</div>
 
-    <!-- Admin Dashboard Modal -->
-    <div class="modal-overlay" id="adminModal">
-        <div class="modal xwide">
-            <button class="modal-close" onclick="closeModal('adminModal')"><i class="fas fa-times"></i></button>
-            <h2><i class="fas fa-shield-alt"></i> Admin <span>Dashboard</span></h2>
-            <div class="admin-stats">
-                <div class="admin-stat-card"><i class="fas fa-shopping-bag"></i><div class="number" id="adminTotalOrders">0</div><div class="label">Total Orders</div></div>
-                <div class="admin-stat-card"><i class="fas fa-clock"></i><div class="number" id="adminPendingOrders">0</div><div class="label">Pending</div></div>
-                <div class="admin-stat-card"><i class="fas fa-check-circle"></i><div class="number" id="adminConfirmedOrders">0</div><div class="label">Confirmed</div></div>
-                <div class="admin-stat-card"><i class="fas fa-users"></i><div class="number" id="adminTotalMembers">0</div><div class="label">Members</div></div>
-            </div>
-            <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-                <button class="btn btn-primary" style="padding:10px 20px;font-size:13px;" onclick="filterOrders('all')"><i class="fas fa-list"></i> All</button>
-                <button class="btn btn-secondary" style="padding:10px 20px;font-size:13px;" onclick="filterOrders('pending')"><i class="fas fa-clock"></i> Pending</button>
-                <button class="btn btn-success" style="padding:10px 20px;font-size:13px;" onclick="filterOrders('confirmed')"><i class="fas fa-check"></i> Confirmed</button>
-            </div>
-            <div class="orders-table-container">
-                <table class="orders-table">
-                    <thead><tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Package</th><th>UID</th><th>Server</th><th>Price</th><th>Receipt</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="adminOrdersTable"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 
-    <script>
+<div class="toast-container"
+     id="toastContainer">
+</div>
 
-        // ==================== DATABASE BACKEND ====================
-        var currentReceiptBase64 = '';
-        var currentOrder = {};
-        var currentFilter = 'all';
 
-        async function api(url, options) {
-            options = options || {};
-            options.credentials = 'same-origin';
-            options.headers = Object.assign({}, options.headers || {});
-            if (sessionStorage.getItem('kakashiAdmin') === '1') options.headers['X-Admin-Key'] = 'KAKASHI-ADMIN-2026';
-            const r = await fetch(url, options);
-            const data = await r.json().catch(() => ({}));
-            if (!r.ok) throw new Error(data.message || 'Request failed');
-            return data;
+<!-- =====================================================
+     FIREBASE
+===================================================== -->
+
+<script type="module">
+
+/*
+=========================================================
+IMPORTANT
+
+1. Create a Firebase project.
+2. Create a Web App.
+3. Copy your Firebase configuration.
+4. Replace the values below.
+=========================================================
+*/
+
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    onSnapshot,
+    query,
+    orderBy,
+    doc,
+    updateDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+/* =====================================================
+   PASTE YOUR FIREBASE CONFIG HERE
+===================================================== */
+
+const firebaseConfig = {
+
+    apiKey: "PASTE_YOUR_API_KEY",
+
+    authDomain:
+        "PASTE_YOUR_PROJECT.firebaseapp.com",
+
+    projectId:
+        "PASTE_YOUR_PROJECT_ID",
+
+    storageBucket:
+        "PASTE_YOUR_PROJECT.firebasestorage.app",
+
+    messagingSenderId:
+        "PASTE_YOUR_SENDER_ID",
+
+    appId:
+        "PASTE_YOUR_APP_ID"
+
+};
+
+
+/* =====================================================
+   FIREBASE INITIALIZE
+===================================================== */
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+const auth = getAuth(app);
+
+
+/* =====================================================
+   PAGE ELEMENTS
+===================================================== */
+
+const customerPage =
+    document.getElementById("customerPage");
+
+const adminLoginPage =
+    document.getElementById("adminLoginPage");
+
+const adminDashboard =
+    document.getElementById("adminDashboard");
+
+
+/* =====================================================
+   PAGE MODE
+===================================================== */
+
+const urlParams =
+    new URLSearchParams(window.location.search);
+
+const isAdminPage =
+    urlParams.get("admin") === "1";
+
+
+if(isAdminPage){
+
+    customerPage.classList.add("hidden");
+
+    adminLoginPage.classList.remove("hidden");
+
+}else{
+
+    customerPage.classList.remove("hidden");
+
+    adminLoginPage.classList.add("hidden");
+
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+window.showToast = function(message,type=""){
+
+    const container =
+        document.getElementById("toastContainer");
+
+    const toast =
+        document.createElement("div");
+
+    toast.className =
+        "toast " + type;
+
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(()=>{
+
+        toast.remove();
+
+    },4000);
+
+};
+
+
+/* =====================================================
+   SELECT PACKAGE
+===================================================== */
+
+window.selectPackage =
+function(packageName,price){
+
+    const select =
+        document.getElementById("package");
+
+    const target =
+        packageName + "|" + price;
+
+    for(const option of select.options){
+
+        if(option.value === target){
+
+            option.selected = true;
+
+            break;
+
         }
 
-        function showToast(message, type) {
-            type = type || 'success';
-            var container = document.getElementById('toastContainer');
-            var toast = document.createElement('div');
-            toast.className = 'toast ' + type;
-            var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-            toast.innerHTML = '<i class="fas ' + icon + '"></i><span>' + message + '</span>';
-            container.appendChild(toast);
-            setTimeout(function() {
-                toast.style.animation = 'toastOut 0.3s ease forwards';
-                setTimeout(function() { toast.remove(); }, 300);
-            }, 4000);
-        }
+    }
 
-        function openModal(id) {
-            document.getElementById(id).classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        async function getMe() {
-            try { return await api('/api/me'); } catch(e) { return {user:null}; }
-        }
-
-        async function openAuthModal() { openModal('authModal'); }
-        function closeAuthModal() {
-            closeModal('authModal');
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-        }
-        function switchAuthTab(tab, btn) {
-            var tabs = document.querySelectorAll('.auth-tab');
-            for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
-            var panels = document.querySelectorAll('.auth-panel');
-            for (var i = 0; i < panels.length; i++) panels[i].classList.remove('active');
-            if (btn) btn.classList.add('active');
-            else document.querySelectorAll('.auth-tab')[tab === 'login' ? 0 : 1].classList.add('active');
-            document.getElementById(tab + 'Panel').classList.add('active');
-        }
-
-        async function handleRegister() {
-            var firstName = document.getElementById('regFirstName').value.trim();
-            var lastName = document.getElementById('regLastName').value.trim();
-            var email = document.getElementById('regEmail').value.trim();
-            var whatsapp = document.getElementById('regWhatsapp').value.trim();
-            var password = document.getElementById('regPassword').value;
-            var confirmPassword = document.getElementById('regConfirmPassword').value;
-            if (!firstName || !lastName || !email || !whatsapp || !password) return showToast('Please fill all fields','warning');
-            if (password.length < 6) return showToast('Password must be at least 6 characters','warning');
-            if (password !== confirmPassword) return showToast('Passwords do not match','warning');
-            try {
-                await api('/api/register', {
-                    method:'POST', headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({name:firstName+' '+lastName,email,whatsapp,password})
-                });
-                showToast('Account created! Please login.');
-                switchAuthTab('login', null);
-                document.getElementById('loginEmail').value = email;
-            } catch(e) { showToast(e.message,'warning'); }
-        }
-
-        async function handleLogin() {
-            var email = document.getElementById('loginEmail').value.trim();
-            var password = document.getElementById('loginPassword').value;
-            if (!email || !password) return showToast('Please enter email and password','warning');
-            try {
-                var d = await api('/api/login', {
-                    method:'POST', headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({email,password})
-                });
-                updateUIForUser(d.user);
-                if (d.user.role === 'admin') sessionStorage.setItem('kakashiAdmin','1'); else sessionStorage.removeItem('kakashiAdmin');
-                closeAuthModal();
-                showToast('Welcome back, ' + d.user.name.split(' ')[0] + '!');
-            } catch(e) { showToast(e.message,'warning'); }
-        }
-
-        async function logout() {
-            sessionStorage.removeItem('kakashiAdmin');
-            await fetch('/api/logout', {method:'POST', credentials:'same-origin'});
-            updateUIForUser(null);
-            showToast('Logged out successfully');
-        }
-
-        function updateUIForUser(user) {
-            var loginBtn = document.getElementById('loginBtn');
-            var avatar = document.getElementById('userAvatar');
-            var dropdown = document.getElementById('userDropdown');
-            var adminNav = document.getElementById('adminNavItem');
-            if (user) {
-                loginBtn.style.display = 'none';
-                avatar.style.display = 'flex';
-                avatar.textContent = (user.name || 'U').charAt(0).toUpperCase();
-                var parts = (user.name || 'Member').split(' ');
-                var html = '<div style="padding:12px 20px;border-bottom:1px solid var(--border);">';
-                html += '<div style="font-weight:700;color:var(--text);">' + (user.name || '') + '</div>';
-                html += '<div style="font-size:12px;color:var(--text-muted);">' + (user.email || '') + '</div>';
-                if (user.role === 'admin') html += '<span class="admin-badge">Admin</span>';
-                html += '</div>';
-                html += '<a href="#" onclick="openMemberDashboard(); toggleUserDropdown(); return false;"><i class="fas fa-user-circle"></i> My Orders</a>';
-                if (user.role === 'admin') {
-                    html += '<a href="#" onclick="openAdminModal(); toggleUserDropdown(); return false;"><i class="fas fa-shield-alt"></i> Admin Panel</a>';
-                    adminNav.style.display = 'block';
-                } else adminNav.style.display = 'none';
-                html += '<div class="dropdown-divider"></div>';
-                html += '<button onclick="logout(); toggleUserDropdown();"><i class="fas fa-sign-out-alt"></i> Logout</button>';
-                dropdown.innerHTML = html;
-            } else {
-                loginBtn.style.display = 'block';
-                avatar.style.display = 'none';
-                adminNav.style.display = 'none';
-                dropdown.innerHTML = '';
-            }
-        }
-
-        function toggleUserDropdown() { document.getElementById('userDropdown').classList.toggle('active'); }
-        document.addEventListener('click', function(e) {
-            var dropdown = document.getElementById('userDropdown'), avatar = document.getElementById('userAvatar');
-            if (!dropdown.contains(e.target) && !avatar.contains(e.target)) dropdown.classList.remove('active');
+    document
+        .getElementById("order")
+        .scrollIntoView({
+            behavior:"smooth"
         });
 
-        function handleReceiptUpload(input) {
-            var file = input.files[0];
-            if (!file) return;
-            if (!file.type.startsWith('image/')) { showToast('Please upload an image file','warning'); input.value=''; return; }
-            if (file.size > 2*1024*1024) { showToast('Image must be less than 2MB','warning'); input.value=''; return; }
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                currentReceiptBase64 = e.target.result;
-                var label = document.getElementById('receiptLabel');
-                label.innerHTML = '<i class="fas fa-check-circle" style="font-size:24px;margin-bottom:8px;display:block;"></i>Receipt uploaded: ' + file.name;
-                label.classList.add('has-file');
-                var preview = document.getElementById('receiptPreview');
-                preview.src = currentReceiptBase64; preview.style.display='block';
-                showToast('Receipt uploaded successfully!');
-            };
-            reader.readAsDataURL(file);
-        }
+};
 
-        function openOrderModal(packageName, price, bonus) {
-            currentOrder = {package:packageName, price:price, bonus:bonus};
-            document.getElementById('modalPackage').textContent = packageName;
-            document.getElementById('modalPrice').textContent = price;
-            document.getElementById('modalBonus').textContent = bonus;
-            getMe().then(function(d){ document.getElementById('guestContactFields').style.display = d.user ? 'none' : 'block'; });
-            currentReceiptBase64='';
-            document.getElementById('receiptFile').value='';
-            var label=document.getElementById('receiptLabel');
-            label.innerHTML='<i class="fas fa-cloud-upload-alt" style="font-size:24px;margin-bottom:8px;display:block;"></i>Click to upload payment receipt screenshot';
-            label.classList.remove('has-file');
-            document.getElementById('receiptPreview').style.display='none';
-            openModal('orderModal');
-        }
 
-        function closeOrderModal() {
-            closeModal('orderModal');
-            ['playerUid','playerName','guestWhatsapp','guestEmail'].forEach(function(id){document.getElementById(id).value='';});
-            document.getElementById('serverRegion').value='';
-            currentReceiptBase64='';
-            document.getElementById('receiptFile').value='';
-            document.getElementById('receiptPreview').style.display='none';
-        }
+/* =====================================================
+   ORDER ID
+===================================================== */
 
-        async function placeOrder() {
-            var uid=document.getElementById('playerUid').value.trim();
-            var region=document.getElementById('serverRegion').value;
-            var playerName=document.getElementById('playerName').value.trim();
-            var me=await getMe();
-            var whatsapp=me.user ? me.user.whatsapp : document.getElementById('guestWhatsapp').value.trim();
-            var email=me.user ? me.user.email : document.getElementById('guestEmail').value.trim();
-            var customerName=me.user ? me.user.name : 'Guest';
-            if(!uid) return showToast('Please enter your Free Fire UID','warning');
-            if(!region) return showToast('Please select your server region','warning');
-            if(!whatsapp) return showToast('Please enter your WhatsApp number','warning');
-            if(!email) return showToast('Please enter your email','warning');
-            if(uid.length<8 || isNaN(uid)) return showToast('Please enter a valid UID','warning');
-            if(!currentReceiptBase64) return showToast('Please upload your payment receipt screenshot','warning');
-            try {
-                var d=await api('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({package:currentOrder.package,price:currentOrder.price,bonus:currentOrder.bonus,
-                        uid,region,playerName:playerName||'Unknown',whatsapp,email,customerName,receipt:currentReceiptBase64})});
-                closeOrderModal();
-                showToast('Order '+d.order.id+' placed successfully!');
-                var msg=encodeURIComponent('New Order - Kakashi Topup\n\nOrder ID: '+d.order.id+'\nPackage: '+currentOrder.package+
-                    '\nPrice: '+currentOrder.price+'\nUID: '+uid+'\nServer: '+region+'\nCustomer: '+customerName+
-                    '\nWhatsApp: '+whatsapp+'\nEmail: '+email+'\nIGN: '+(playerName||'Unknown')+'\nReceipt: Uploaded');
-                window.open('https://wa.me/94766559214?text='+msg,'_blank');
-            } catch(e){ showToast(e.message,'warning'); }
-        }
+function generateOrderId(){
 
-        async function openMemberDashboard() {
-            var me=await getMe();
-            if(!me.user){showToast('Please login first','warning');openAuthModal();return;}
-            try {
-                var d=await api('/api/my-orders');
-                var orders=d.orders||[];
-                document.getElementById('memberTotalOrders').textContent=orders.length;
-                document.getElementById('memberConfirmedOrders').textContent=orders.filter(o=>o.status==='confirmed').length;
-                document.getElementById('memberPendingOrders').textContent=orders.filter(o=>o.status==='pending').length;
-                var list=document.getElementById('memberOrdersList');
-                if(!orders.length){list.innerHTML='<p style="text-align:center;color:var(--text-muted);padding:40px;">No orders yet. Start shopping!</p>';}
-                else {
-                    list.innerHTML=orders.map(function(o){
-                        return '<div class="order-card"><div class="order-card-info"><h4>'+o.package+'</h4><p>Order: '+o.id+' | Server: '+o.region+' | UID: '+o.uid+'</p></div><div class="order-card-status"><div class="date">'+o.created_at+'</div><span class="status-badge status-'+o.status+'">'+o.status+'</span></div></div>';
-                    }).join('');
+    const now = new Date();
+
+    const year =
+        now.getFullYear();
+
+    const month =
+        String(now.getMonth()+1).padStart(2,"0");
+
+    const day =
+        String(now.getDate()).padStart(2,"0");
+
+    const random =
+        Math.floor(1000 + Math.random()*9000);
+
+    return `KAK-${year}${month}${day}-${random}`;
+
+}
+
+
+/* =====================================================
+   PLACE ORDER
+===================================================== */
+
+const orderForm =
+    document.getElementById("orderForm");
+
+
+if(orderForm){
+
+    orderForm.addEventListener(
+        "submit",
+        async function(e){
+
+            e.preventDefault();
+
+
+            const button =
+                document.getElementById("submitOrder");
+
+            button.disabled = true;
+
+            button.textContent =
+                "Submitting Order...";
+
+
+            try{
+
+                const name =
+                    document
+                    .getElementById("customerName")
+                    .value.trim();
+
+                const uid =
+                    document
+                    .getElementById("ffUid")
+                    .value.trim();
+
+                const phone =
+                    document
+                    .getElementById("phone")
+                    .value.trim();
+
+                const packageValue =
+                    document
+                    .getElementById("package")
+                    .value;
+
+                const paymentMethod =
+                    document
+                    .getElementById("paymentMethod")
+                    .value;
+
+                const note =
+                    document
+                    .getElementById("note")
+                    .value.trim();
+
+
+                if(!packageValue){
+
+                    throw new Error(
+                        "Please select a package."
+                    );
+
                 }
-                openModal('memberModal');
-            } catch(e){showToast(e.message,'warning');}
-        }
 
-        async function openAdminModal() {
-            var me=await getMe();
-            if(!me.user || String(me.user.role).toLowerCase()!=='admin'){
-                // Local admin fallback: if this browser has just authenticated as the
-                // built-in admin, allow the dashboard API to use the local admin key.
-                if (sessionStorage.getItem('kakashiAdmin') === '1') {
-                    openModal('adminModal');
-                    await renderAdminDashboard();
-                    return;
-                }
-                showToast('Please login as admin first.','warning');
-                openAuthModal();
-                return;
-            }
-            sessionStorage.setItem('kakashiAdmin','1');
-            openModal('adminModal');
-            await renderAdminDashboard();
-        }
 
-        async function renderAdminDashboard() {
-            try {
-                var d=await api('/api/admin/orders?status='+encodeURIComponent(currentFilter));
-                document.getElementById('adminTotalOrders').textContent=d.stats.total;
-                document.getElementById('adminPendingOrders').textContent=d.stats.pending;
-                document.getElementById('adminConfirmedOrders').textContent=d.stats.confirmed;
-                document.getElementById('adminTotalMembers').textContent=d.stats.members;
-                var tbody=document.getElementById('adminOrdersTable');
-                tbody.innerHTML=d.orders.length ? d.orders.map(function(o){
-                    var actions=o.status==='pending'
-                        ? '<button class="btn-confirm" onclick="confirmOrder('+o.id+')"><i class="fas fa-check"></i> Confirm</button><button class="btn-cancel" onclick="cancelOrder('+o.id+')"><i class="fas fa-times"></i></button>'
-                        : '<button class="btn-notify" onclick="notifyCustomer('+o.id+')"><i class="fab fa-whatsapp"></i> Notify</button>';
-                    var receipt=o.receipt ? '<button class="btn-view" onclick="viewReceipt('+o.id+')"><i class="fas fa-receipt"></i> View</button>' : 'No receipt';
-                    return '<tr><td><strong>#'+o.id+'</strong></td><td>'+o.created_at+'</td><td>'+o.customer_name+'<br><small>'+o.whatsapp+'</small></td><td><strong>'+o.package+'</strong><br><small>'+o.bonus+'</small></td><td>'+o.uid+'</td><td>'+o.region+'</td><td><strong>'+o.price+'</strong></td><td>'+receipt+'</td><td><span class="status-badge status-'+o.status+'">'+o.status+'</span></td><td>'+actions+'</td></tr>';
-                }).join('') : '<tr><td colspan="10" style="text-align:center;padding:40px;">No orders found</td></tr>';
-            } catch(e){
-                showToast(e.message || 'Unable to load admin dashboard','warning');
-                if ((e.message || '').toLowerCase().includes('admin access')) openAuthModal();
-            }
-        }
-        function filterOrders(status){renderAdminDashboard();}
-        async function viewReceipt(id){
-            try {var d=await api('/api/admin/order/'+id); if(!d.order.receipt)return showToast('Receipt not found','warning');
-                document.getElementById('receiptModalImg').src=d.order.receipt;
-                document.getElementById('receiptDownloadLink').href=d.order.receipt; openModal('receiptModal');
-            }catch(e){showToast(e.message,'warning');}
-        }
-        function normalizeWhatsApp(number){
-            var n=String(number||'').replace(/[^0-9+]/g,'');
-            if(n.indexOf('+')===0) n=n.substring(1);
-            if(n.indexOf('00')===0) n=n.substring(2);
-            if(n.indexOf('0')===0) n='94'+n.substring(1);
-            return n;
-        }
+                const parts =
+                    packageValue.split("|");
 
-        async function confirmOrder(id){
-            // Open the WhatsApp tab immediately from the user's click so the browser does not block it as a popup.
-            var waTab=null;
-            try { waTab=window.open('about:blank','_blank'); } catch(ignore) {}
-            try {
-                var d=await api('/api/admin/order/'+id+'/confirm',{method:'POST'});
-                renderAdminDashboard(); showToast('Order #'+id+' confirmed!');
-                var o=d.order;
-                var msg=encodeURIComponent('Order Confirmed - Kakashi Topup\n\nHello '+o.customer_name+',\nYour order has been confirmed!\n\nPackage: '+o.package+'\nPrice: '+o.price+'\nOrder ID: #'+o.id+'\nUID: '+o.uid+'\n\nThank you for choosing Kakashi Topup!');
-                var waUrl='https://wa.me/'+normalizeWhatsApp(o.whatsapp)+'?text='+msg;
-                if(waTab && !waTab.closed){ waTab.location.href=waUrl; }
-                else { window.location.href=waUrl; }
-                setTimeout(function(){showToast('WhatsApp message is ready. Please press Send in WhatsApp.','success');},800);
-                setTimeout(function(){showToast('Email notification prepared for '+o.email,'success');},1500);
-            }catch(e){ if(waTab && !waTab.closed) waTab.close(); showToast(e.message,'warning');}
-        }
-        async function cancelOrder(id){
-            if(!confirm('Are you sure you want to cancel this order?'))return;
-            try{await api('/api/admin/order/'+id+'/cancel',{method:'POST'});renderAdminDashboard();showToast('Order cancelled');}
-            catch(e){showToast(e.message,'warning');}
-        }
-        async function notifyCustomer(id){
-            try{var d=await api('/api/admin/order/'+id);var o=d.order;
-                var msg=encodeURIComponent('Kakashi Topup Update\n\nHello '+o.customer_name+',\n\nYour order #'+o.id+' is currently '+o.status.toUpperCase()+'.\nPackage: '+o.package+'\nUID: '+o.uid+'\n\nKakashi Topup Team');
-                var waUrl='https://wa.me/'+normalizeWhatsApp(o.whatsapp)+'?text='+msg;
-                window.open(waUrl,'_blank');
-            }catch(e){showToast(e.message,'warning');}
-        }
+                const packageName =
+                    parts[0];
 
-        // Initialize server session UI
-        getMe().then(function(d){ updateUIForUser(d.user); });
+                const price =
+                    parts[1];
 
-        // ==================== NAVIGATION ====================
-        function showSection(id) {
-            var el = document.getElementById(id);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
 
-        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
-            document.getElementById('navLinks').classList.toggle('active');
-        });
+                const orderId =
+                    generateOrderId();
 
-        var navLinks = document.querySelectorAll('.nav-links a');
-        for (var i = 0; i < navLinks.length; i++) {
-            navLinks[i].addEventListener('click', function() {
-                document.getElementById('navLinks').classList.remove('active');
-            });
-        }
 
-        // Modal overlay clicks
-        var modalIds = ['orderModal', 'authModal', 'memberModal', 'adminModal', 'receiptModal'];
-        for (var i = 0; i < modalIds.length; i++) {
-            (function(id) {
-                document.getElementById(id).addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        if (id === 'orderModal') closeOrderModal();
-                        else closeModal(id);
+                /* SAVE ORDER TO FIRESTORE */
+
+                await addDoc(
+                    collection(db,"orders"),
+                    {
+
+                        orderId: orderId,
+
+                        customerName: name,
+
+                        ffUid: uid,
+
+                        phone: phone,
+
+                        packageName: packageName,
+
+                        price: price,
+
+                        paymentMethod:
+                            paymentMethod,
+
+                        note: note,
+
+                        status: "Pending",
+
+                        createdAt:
+                            serverTimestamp()
+
                     }
-                });
-            })(modalIds[i]);
-        }
+                );
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeOrderModal();
-                closeModal('authModal');
-                closeModal('memberModal');
-                closeModal('adminModal');
-                closeModal('receiptModal');
-            }
-        });
 
-        // ==================== ANIMATIONS ====================
-        function createParticles() {
-            var container = document.getElementById('particles');
-            for (var i = 0; i < 50; i++) {
-                var p = document.createElement('div');
-                p.className = 'particle';
-                p.style.left = Math.random() * 100 + '%';
-                p.style.top = Math.random() * 100 + '%';
-                p.style.animationDelay = Math.random() * 15 + 's';
-                p.style.animationDuration = (10 + Math.random() * 10) + 's';
-                container.appendChild(p);
-            }
-        }
-        createParticles();
+                /* SUCCESS */
 
-        var observer = new IntersectionObserver(function(entries) {
-            for (var i = 0; i < entries.length; i++) {
-                if (entries[i].isIntersecting) entries[i].target.classList.add('visible');
-            }
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-        var fadeEls = document.querySelectorAll('.fade-in');
-        for (var i = 0; i < fadeEls.length; i++) observer.observe(fadeEls[i]);
+                document
+                    .getElementById("generatedOrderId")
+                    .textContent =
+                    orderId;
 
-        function animateCounters() {
-            var counters = document.querySelectorAll('.stat-number');
-            for (var i = 0; i < counters.length; i++) {
-                (function(counter) {
-                    var target = parseInt(counter.getAttribute('data-count'));
-                    var increment = target / 125;
-                    var current = 0;
-                    function update() {
-                        current += increment;
-                        if (current < target) {
-                            counter.textContent = Math.floor(current).toLocaleString();
-                            requestAnimationFrame(update);
-                        } else {
-                            counter.textContent = target.toLocaleString() + (target === 99 ? '%' : target === 5 ? '' : '+');
-                        }
-                    }
-                    var obs = new IntersectionObserver(function(entries) {
-                        for (var j = 0; j < entries.length; j++) {
-                            if (entries[j].isIntersecting) { update(); obs.unobserve(counter); }
-                        }
+
+                const whatsappMessage =
+`Hello Kakashi Topup Store!
+
+I placed an order.
+
+Order ID: ${orderId}
+Name: ${name}
+Free Fire UID: ${uid}
+Package: ${packageName}
+Price: ${price}
+Payment: ${paymentMethod}
+Phone: ${phone}
+
+Please confirm my order.`;
+
+                document
+                    .getElementById("orderWhatsapp")
+                    .href =
+                    "https://wa.me/94766559214?text=" +
+                    encodeURIComponent(
+                        whatsappMessage
+                    );
+
+
+                document
+                    .getElementById("orderResult")
+                    .classList.remove("hidden");
+
+
+                orderForm.reset();
+
+
+                showToast(
+                    "Order submitted successfully!",
+                    "success"
+                );
+
+
+                document
+                    .getElementById("orderResult")
+                    .scrollIntoView({
+                        behavior:"smooth"
                     });
-                    obs.observe(counter);
-                })(counters[i]);
-            }
-        }
-        animateCounters();
 
-        window.addEventListener('scroll', function() {
-            document.querySelector('nav').style.background = window.scrollY > 50 ? 'rgba(5,5,5,0.98)' : 'rgba(5,5,5,0.95)';
+
+            }catch(error){
+
+                console.error(error);
+
+                showToast(
+                    "Order failed: " +
+                    error.message,
+                    "error"
+                );
+
+            }finally{
+
+                button.disabled = false;
+
+                button.textContent =
+                    "🔥 PLACE ORDER";
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   ADMIN LOGIN
+===================================================== */
+
+const loginForm =
+    document.getElementById("loginForm");
+
+
+if(loginForm){
+
+    loginForm.addEventListener(
+        "submit",
+        async function(e){
+
+            e.preventDefault();
+
+
+            const email =
+                document
+                .getElementById("adminEmail")
+                .value.trim();
+
+            const password =
+                document
+                .getElementById("adminPassword")
+                .value;
+
+
+            try{
+
+                await signInWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+
+
+                showToast(
+                    "Login successful!",
+                    "success"
+                );
+
+
+            }catch(error){
+
+                console.error(error);
+
+                showToast(
+                    "Login failed. Check email/password.",
+                    "error"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   AUTH STATE
+===================================================== */
+
+onAuthStateChanged(
+    auth,
+    user => {
+
+        if(!isAdminPage){
+
+            return;
+
+        }
+
+
+        if(user){
+
+            adminLoginPage
+                .classList
+                .add("hidden");
+
+            adminDashboard
+                .classList
+                .remove("hidden");
+
+            loadOrders();
+
+        }else{
+
+            adminLoginPage
+                .classList
+                .remove("hidden");
+
+            adminDashboard
+                .classList
+                .add("hidden");
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   LOAD ORDERS
+===================================================== */
+
+let unsubscribeOrders = null;
+
+
+function loadOrders(){
+
+    if(unsubscribeOrders){
+
+        unsubscribeOrders();
+
+    }
+
+
+    const ordersQuery =
+        query(
+            collection(db,"orders"),
+            orderBy(
+                "createdAt",
+                "desc"
+            )
+        );
+
+
+    unsubscribeOrders =
+        onSnapshot(
+            ordersQuery,
+            snapshot => {
+
+                const orders = [];
+
+
+                snapshot.forEach(
+                    documentSnapshot => {
+
+                        orders.push({
+
+                            id:
+                                documentSnapshot.id,
+
+                            ...documentSnapshot.data()
+
+                        });
+
+                    }
+                );
+
+
+                renderOrders(orders);
+
+            },
+            error => {
+
+                console.error(error);
+
+                showToast(
+                    "Could not load orders.",
+                    "error"
+                );
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   RENDER ORDERS
+===================================================== */
+
+function renderOrders(orders){
+
+    const body =
+        document.getElementById("ordersBody");
+
+    body.innerHTML = "";
+
+
+    let pending = 0;
+
+    let processing = 0;
+
+    let completed = 0;
+
+
+    orders.forEach(order => {
+
+        if(order.status === "Pending")
+            pending++;
+
+        if(order.status === "Processing")
+            processing++;
+
+        if(order.status === "Completed")
+            completed++;
+
+
+        const tr =
+            document.createElement("tr");
+
+
+        const date =
+            order.createdAt
+                ? order.createdAt
+                    .toDate()
+                    .toLocaleString()
+                : "Just now";
+
+
+        tr.innerHTML = `
+
+            <td>
+                <strong style="color:#ffcc00;">
+                    ${escapeHTML(order.orderId || "")}
+                </strong>
+            </td>
+
+            <td>
+                ${escapeHTML(date)}
+            </td>
+
+            <td>
+                ${escapeHTML(order.customerName || "")}
+            </td>
+
+            <td>
+                ${escapeHTML(order.ffUid || "")}
+            </td>
+
+            <td>
+                ${escapeHTML(order.phone || "")}
+            </td>
+
+            <td>
+                ${escapeHTML(order.packageName || "")}
+                <br>
+                <strong style="color:#ffcc00;">
+                    ${escapeHTML(order.price || "")}
+                </strong>
+            </td>
+
+            <td>
+                ${escapeHTML(order.paymentMethod || "")}
+            </td>
+
+            <td>
+                ${escapeHTML(order.note || "-")}
+            </td>
+
+            <td>
+
+                <select
+                    class="status-select"
+                    data-id="${order.id}">
+
+                    <option value="Pending"
+                        ${order.status === "Pending" ? "selected" : ""}>
+                        Pending
+                    </option>
+
+                    <option value="Processing"
+                        ${order.status === "Processing" ? "selected" : ""}>
+                        Processing
+                    </option>
+
+                    <option value="Completed"
+                        ${order.status === "Completed" ? "selected" : ""}>
+                        Completed
+                    </option>
+
+                    <option value="Cancelled"
+                        ${order.status === "Cancelled" ? "selected" : ""}>
+                        Cancelled
+                    </option>
+
+                </select>
+
+            </td>
+        `;
+
+
+        body.appendChild(tr);
+
+    });
+
+
+    document
+        .getElementById("totalOrders")
+        .textContent =
+        orders.length;
+
+
+    document
+        .getElementById("pendingOrders")
+        .textContent =
+        pending;
+
+
+    document
+        .getElementById("processingOrders")
+        .textContent =
+        processing;
+
+
+    document
+        .getElementById("completedOrders")
+        .textContent =
+        completed;
+
+
+    document
+        .querySelectorAll(".status-select")
+        .forEach(select => {
+
+            select.addEventListener(
+                "change",
+                async function(){
+
+                    await updateOrderStatus(
+                        this.dataset.id,
+                        this.value
+                    );
+
+                }
+            );
+
         });
 
-    </script>
+}
+
+
+/* =====================================================
+   UPDATE ORDER STATUS
+===================================================== */
+
+async function updateOrderStatus(
+    documentId,
+    status
+){
+
+    try{
+
+        await updateDoc(
+            doc(
+                db,
+                "orders",
+                documentId
+            ),
+            {
+                status: status
+            }
+        );
+
+
+        showToast(
+            "Order status updated.",
+            "success"
+        );
+
+
+    }catch(error){
+
+        console.error(error);
+
+        showToast(
+            "Could not update status.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+window.logoutAdmin =
+async function(){
+
+    try{
+
+        await signOut(auth);
+
+        showToast(
+            "Logged out.",
+            "success"
+        );
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+};
+
+
+/* =====================================================
+   BACK TO STORE
+===================================================== */
+
+window.goStore =
+function(){
+
+    window.location.href =
+        window.location.pathname;
+
+};
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
+
+</script>
+
 </body>
 </html>
