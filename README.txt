@@ -1,24 +1,48 @@
-KAKASHI TOPUP CENTER - Integrated Part 1 + Part 2 + Backend + SQLite
+KAKASHI TOPUP CENTER - MANUAL TOP-UP EDITION
 
-1. Install Python 3.10+.
-2. Open CMD in this folder.
-3. Run: pip install -r requirements.txt
-4. Run: python app.py
-5. Open: http://127.0.0.1:5000
+This build includes secure SMS OTP authentication using Text.lk.
 
-Admin:
-Email: admin@kakashi.com
-Password: admin123
+1) Install Python 3.10+
+2) Open CMD in this folder
+3) Run: pip install -r requirements.txt
+4) Configure the environment variables below
+5) Run: python app.py
+6) Open: http://127.0.0.1:5000
 
-The website design is based on your supplied Part 1 and Part 2. Member accounts,
-orders, statuses, admin statistics and receipt data are stored in SQLite.
-Change the admin password and SECRET_KEY before publishing.
+TEXT.LK SMS OTP CONFIGURATION
+Set these environment variables on the SERVER (never in index.html):
+  TEXTLK_API_TOKEN=your_textlk_bearer_token
+  TEXTLK_SENDER_ID=your_sender_id
 
-WhatsApp buttons open WhatsApp with the order/customer message. Actual automatic
-server-side WhatsApp delivery and real email sending require API credentials.
+The app uses Text.lk's Bearer-token POST endpoint:
+  https://app.text.lk/api/v3/sms/send
 
+OTP FLOW
+Customer registration:
+  Register -> SMS OTP -> Verify OTP -> Account verified -> Login
 
-ADMIN FIX V3: includes robust same-origin sessions and a local-only admin fallback key for the built-in admin account.
+Member login:
+  Email + Password -> SMS OTP -> Verify OTP -> Logged in
 
+Forgot password:
+  Email/Mobile -> SMS OTP -> New password
 
-WhatsApp: Confirm opens a WhatsApp chat with the customer and pre-fills the confirmation message. WhatsApp requires the user/admin to press Send; a normal website cannot silently send WhatsApp messages without an official WhatsApp Business API integration.
+SECURITY
+- OTPs are stored as SHA-256 hashes, not plaintext.
+- OTP expires after 5 minutes.
+- Maximum 5 incorrect attempts per OTP.
+- Resend is rate-limited to once per 60 seconds.
+- SMS credentials stay on the backend and are never sent to the browser.
+- Admin login also uses the admin mobile number for OTP.
+- The frontend no longer contains the admin API key.
+- Change SECRET_KEY, ADMIN_PASSWORD and ADMIN_API_KEY using environment variables before publishing.
+- Use HTTPS in production.
+
+ADMIN
+The existing admin account/role system is preserved. The admin password is checked first, then an OTP is sent to ADMIN_WHATSAPP.
+
+EXISTING FEATURES
+Wallet, orders, admin order management, manual top-up flow, UID validation, receipts and order history are preserved.
+
+IMPORTANT
+If TEXTLK_API_TOKEN or TEXTLK_SENDER_ID is missing, OTP sending will fail with a clear server-side configuration error. Do not put the Text.lk token in frontend JavaScript or commit it to GitHub.
