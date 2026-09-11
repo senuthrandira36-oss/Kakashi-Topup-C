@@ -33,7 +33,15 @@ PACKAGES = {
 }
 
 def db():
- c=sqlite3.connect(DB); c.row_factory=sqlite3.Row; return c
+    # SQLite can briefly be busy when Faable restarts or another request is committing.
+    # Use WAL + a generous busy timeout so normal concurrent requests wait instead of
+    # immediately failing with "database is locked".
+    c = sqlite3.connect(DB, timeout=30, check_same_thread=False)
+    c.row_factory = sqlite3.Row
+    c.execute('PRAGMA busy_timeout=30000')
+    c.execute('PRAGMA journal_mode=WAL')
+    c.execute('PRAGMA synchronous=NORMAL')
+    return c
 
 def init_db():
  c=db()
@@ -144,7 +152,7 @@ def create_and_send_otp(email, purpose, phone, label='OTP'):
     c.execute("UPDATE otp SET used=1 WHERE email=? AND purpose=? AND used=0", (email, purpose))
     code = f'{secrets.randbelow(1000000):06d}'
     c.execute(
-        "INSERT INTO otp(email,code,purpose,expires_at,used,attempts,created_at) VALUES(?,?,?,?,0,0,?,?)",
+        "INSERT INTO otp(email,code,purpose,expires_at,used,attempts,created_at) VALUES(?,?,?,?,0,0,?)",
         (email, hash_otp(code), purpose, now + OTP_EXPIRY_SECONDS, 0, now)
     )
     otp_id = c.execute("SELECT last_insert_rowid()").fetchone()[0]
@@ -225,6 +233,10 @@ def register():
     if not normalized:return jsonify(message='Enter a valid Sri Lankan mobile number'),400
     c=db()
     try:
+        # Take one short write transaction for member + wallet creation.
+        # The connection has a 30s busy timeout, so transient SQLite locks are retried
+        # by SQLite instead of immediately returning 500 to the browser.
+        c.execute('BEGIN IMMEDIATE')
         cur=c.execute(
             "INSERT INTO members(name,email,whatsapp,password_hash,verified) VALUES(?,?,?,?,0)",
             (name,email,phone,generate_password_hash(password))
@@ -233,8 +245,17 @@ def register():
         c.execute('INSERT INTO wallet(member_id,balance) VALUES(?,0)',(mid,))
         c.commit()
     except sqlite3.IntegrityError:
+        try: c.rollback()
+        except Exception: pass
         c.close()
         return jsonify(message='Email already registered'),409
+    except sqlite3.OperationalError as exc:
+        try: c.rollback()
+        except Exception: pass
+        c.close()
+        if 'locked' in str(exc).lower():
+            return jsonify(message='Database is busy. Please try again in a few seconds.'),503
+        raise
     c.close()
     try:
         create_and_send_otp(email,'register',normalized,'registration OTP')
