@@ -46,3 +46,7 @@ Wallet, orders, admin order management, manual top-up flow, UID validation, rece
 
 IMPORTANT
 If TEXTLK_API_TOKEN or TEXTLK_SENDER_ID is missing, OTP sending will fail with a clear server-side configuration error. Do not put the Text.lk token in frontend JavaScript or commit it to GitHub.
+
+
+FINAL V10 FLOW:
+Member login uses email+password only. OTP is used for registration verification and password reset only. Admin login uses email+password only. Wallet recharge requires a receipt and admin approval credits the member wallet. My Wallet package orders require no receipt and deduct immediately; Bank Transfer orders require a receipt. Member history includes wallet recharges and orders, and order receipts can be downloaded.
