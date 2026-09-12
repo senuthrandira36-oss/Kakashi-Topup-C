@@ -36,32 +36,102 @@ PACKAGES = {
  }
 }
 
-# SQLite configuration. Keep connections short-lived and let SQLite handle
-# brief concurrent access with WAL + busy_timeout. Do NOT hold a process/file lock
-# for the lifetime of a connection, because that can make HTTP requests wait for
-# another worker and eventually produce Gateway Timeout.
+# SQLite configuration.
+# Faable can run more than one process/container against the same persistent DB.
+# We therefore use short-lived connections, autocommit for single writes, and
+# an OS-level lock ONLY while a write statement/explicit transaction is active.
+# The lock is never held for the lifetime of a connection, which avoids the
+# previous Gateway Timeout behaviour.
+_db_process_lock = threading.RLock()
+
+class SafeSQLiteConnection(sqlite3.Connection):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._write_lock = None
+        self._write_lock_held = False
+
+    def _acquire_write_lock(self):
+        if self._write_lock_held:
+            return
+        _db_process_lock.acquire()
+        try:
+            if fcntl:
+                self._write_lock = open(DB + '.write.lock', 'a+')
+                fcntl.flock(self._write_lock.fileno(), fcntl.LOCK_EX)
+            self._write_lock_held = True
+        except Exception:
+            _db_process_lock.release()
+            raise
+
+    def _release_write_lock(self):
+        if not self._write_lock_held:
+            return
+        try:
+            if self._write_lock and fcntl:
+                fcntl.flock(self._write_lock.fileno(), fcntl.LOCK_UN)
+            if self._write_lock:
+                self._write_lock.close()
+        finally:
+            self._write_lock = None
+            self._write_lock_held = False
+            _db_process_lock.release()
+
+    def execute(self, sql, parameters=()):
+        first = str(sql).lstrip().split(None, 1)[0].upper() if str(sql).strip() else ''
+        if first in ('BEGIN', 'BEGIN;'):
+            self._acquire_write_lock()
+            try:
+                return super().execute(sql, parameters)
+            except Exception:
+                self._release_write_lock()
+                raise
+        # With autocommit enabled, a standalone write is committed before
+        # execute() returns, so the OS lock can safely be released immediately.
+        is_write = first in ('INSERT','UPDATE','DELETE','REPLACE','CREATE','ALTER','DROP','VACUUM','REINDEX')
+        if is_write and not self._write_lock_held:
+            self._acquire_write_lock()
+            try:
+                return super().execute(sql, parameters)
+            finally:
+                self._release_write_lock()
+        return super().execute(sql, parameters)
+
+    def commit(self):
+        try:
+            return super().commit()
+        finally:
+            self._release_write_lock()
+
+    def rollback(self):
+        try:
+            return super().rollback()
+        finally:
+            self._release_write_lock()
+
+    def close(self):
+        try:
+            return super().close()
+        finally:
+            self._release_write_lock()
+
 def db():
-    # IMPORTANT: never change journal_mode while opening a request connection.
-    # journal_mode=WAL can itself require an exclusive lock and was the source
-    # of the recurring 'database is locked' error on multi-worker hosting.
-    c = sqlite3.connect(DB, timeout=8, check_same_thread=False)
+    c = sqlite3.connect(
+        DB,
+        timeout=30,
+        check_same_thread=False,
+        isolation_level=None,
+        factory=SafeSQLiteConnection
+    )
     c.row_factory = sqlite3.Row
-    c.execute('PRAGMA busy_timeout=8000')
+    c.execute('PRAGMA busy_timeout=30000')
     c.execute('PRAGMA foreign_keys=ON')
     return c
 
 def init_db():
  c=db()
- # Try to enable WAL once. If another worker is starting at the same time,
- # continue with the existing journal mode; normal connections remain safe.
- for _ in range(5):
-  try:
-   c.execute('PRAGMA journal_mode=WAL').fetchone()
-   c.execute('PRAGMA synchronous=NORMAL')
-   break
-  except sqlite3.OperationalError as exc:
-   if 'locked' not in str(exc).lower() and 'busy' not in str(exc).lower(): raise
-   time.sleep(0.5)
+ # Do not change journal_mode during application startup/request handling.
+ # Existing databases keep their current journal mode.
+ c.execute('PRAGMA synchronous=NORMAL')
  c.execute('''CREATE TABLE IF NOT EXISTS members(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,email TEXT UNIQUE NOT NULL,whatsapp TEXT NOT NULL,password_hash TEXT NOT NULL,role TEXT DEFAULT 'member',verified INTEGER DEFAULT 1,created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
  c.execute('''CREATE TABLE IF NOT EXISTS orders(id INTEGER PRIMARY KEY AUTOINCREMENT,member_id INTEGER,customer_name TEXT NOT NULL,whatsapp TEXT NOT NULL,email TEXT NOT NULL,game TEXT NOT NULL,package TEXT NOT NULL,unit_price INTEGER NOT NULL,quantity INTEGER NOT NULL,price INTEGER NOT NULL,bonus TEXT DEFAULT '',uid TEXT NOT NULL,region TEXT NOT NULL,player_name TEXT DEFAULT '',payment_method TEXT NOT NULL,receipt TEXT,status TEXT DEFAULT 'pending',created_at TEXT DEFAULT CURRENT_TIMESTAMP,confirmed_at TEXT,cancelled_at TEXT)''')
  c.execute('''CREATE TABLE IF NOT EXISTS wallet(id INTEGER PRIMARY KEY AUTOINCREMENT,member_id INTEGER UNIQUE NOT NULL,balance INTEGER DEFAULT 0,reserved INTEGER DEFAULT 0)''')
