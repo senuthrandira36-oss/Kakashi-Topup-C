@@ -159,8 +159,11 @@ def init_db():
  c.commit(); c.close()
 
 def current_user():
- if not session.get('member_id'): return None
- return dict(id=session['member_id'],name=session.get('name'),email=session.get('email'),whatsapp=session.get('whatsapp'),role=session.get('role'))
+ role = session.get('role')
+ if role == 'admin':
+  return dict(id=0,name=session.get('name','Admin Kakashi'),email=session.get('email',ADMIN_EMAIL),whatsapp=session.get('whatsapp',ADMIN_WHATSAPP),role='admin')
+ if role != 'member' or not session.get('member_id'): return None
+ return dict(id=session['member_id'],name=session.get('name'),email=session.get('email'),whatsapp=session.get('whatsapp'),role='member')
 
 def admin_request(): return session.get('role')=='admin' or request.headers.get('X-Admin-Key')==ADMIN_API_KEY
 
@@ -413,40 +416,20 @@ def login():
     email=d.get('email','').strip().lower()
     password=d.get('password','')
     if not email or not password:return jsonify(message='Email and password are required'),400
-    role='member'
-    phone=None
-    name=None
+
+    # ADMIN: direct login with email + password. NO OTP.
     if email==ADMIN_EMAIL.lower() and secrets.compare_digest(password, ADMIN_PASSWORD):
-        role='admin'; phone=ADMIN_WHATSAPP; name='Admin Kakashi'
-    else:
-        c=db(); u=c.execute('SELECT * FROM members WHERE email=?',(email,)).fetchone(); c.close()
-        if not u or not check_password_hash(u['password_hash'],password):return jsonify(message='Invalid email or password'),401
-        if not u['verified']:return jsonify(message='Please verify your account first'),403
-        phone=u['whatsapp']; name=u['name']
-    # Members use normal email + password login. OTP is only used for the
-    # admin account. Password recovery uses the separate reset OTP flow.
-    if role == 'member':
         session.clear(); session.permanent=True
-        # Re-fetch the member so the session is based on the current DB record.
-        c=db(); u=c.execute('SELECT * FROM members WHERE email=?',(email,)).fetchone(); c.close()
-        if not u:
-            return jsonify(message='Account not found'),404
-        session.update(role='member',member_id=u['id'],name=u['name'],email=u['email'],whatsapp=u['whatsapp'])
+        session.update(role='admin',member_id=0,name='Admin Kakashi',email=ADMIN_EMAIL,whatsapp=ADMIN_WHATSAPP)
         return jsonify(ok=True,otp_required=False,user=current_user())
 
-    normalized=normalize_phone(phone)
-    if not normalized:return jsonify(message='A valid mobile number is required for OTP login'),500
-    session.clear()
-    session['pending_login']={'email':email,'role':role,'name':name}
-    try:
-        create_and_send_otp(email,'login',normalized,'login OTP')
-    except ValueError as exc:
-        session.pop('pending_login',None)
-        return jsonify(message=str(exc)),429
-    except Exception as exc:
-        session.pop('pending_login',None)
-        return jsonify(message=str(exc)),502
-    return jsonify(ok=True,otp_required=True,masked_phone='******'+normalized[-4:])
+    # MEMBER: direct login with email + password. OTP is only for register and password reset.
+    c=db(); u=c.execute('SELECT * FROM members WHERE email=?',(email,)).fetchone(); c.close()
+    if not u or not check_password_hash(u['password_hash'],password):return jsonify(message='Invalid email or password'),401
+    if not u['verified']:return jsonify(message='Please verify your account first'),403
+    session.clear(); session.permanent=True
+    session.update(role='member',member_id=u['id'],name=u['name'],email=u['email'],whatsapp=u['whatsapp'])
+    return jsonify(ok=True,otp_required=False,user=current_user())
 
 @app.post('/api/resend-otp')
 def resend_otp():
@@ -614,6 +597,15 @@ def create_order():
 @member_required
 def my_orders():
  c=db(); rows=c.execute('SELECT * FROM orders WHERE member_id=? ORDER BY id DESC',(session['member_id'],)).fetchall(); c.close(); return jsonify(orders=[dict(r) for r in rows])
+
+@app.get('/api/my-history')
+@member_required
+def my_history():
+ c=db()
+ orders=c.execute('SELECT * FROM orders WHERE member_id=? ORDER BY id DESC',(session['member_id'],)).fetchall()
+ txns=c.execute('SELECT * FROM wallet_transactions WHERE member_id=? ORDER BY id DESC',(session['member_id'],)).fetchall()
+ c.close()
+ return jsonify(orders=[dict(r) for r in orders],transactions=[dict(r) for r in txns])
 
 @app.get('/api/admin/orders')
 @admin_required
