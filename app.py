@@ -41,16 +41,27 @@ PACKAGES = {
 # for the lifetime of a connection, because that can make HTTP requests wait for
 # another worker and eventually produce Gateway Timeout.
 def db():
-    c = sqlite3.connect(DB, timeout=30, check_same_thread=False)
+    # IMPORTANT: never change journal_mode while opening a request connection.
+    # journal_mode=WAL can itself require an exclusive lock and was the source
+    # of the recurring 'database is locked' error on multi-worker hosting.
+    c = sqlite3.connect(DB, timeout=8, check_same_thread=False)
     c.row_factory = sqlite3.Row
-    c.execute('PRAGMA busy_timeout=30000')
+    c.execute('PRAGMA busy_timeout=8000')
     c.execute('PRAGMA foreign_keys=ON')
-    c.execute('PRAGMA journal_mode=WAL')
-    c.execute('PRAGMA synchronous=NORMAL')
     return c
 
 def init_db():
  c=db()
+ # Try to enable WAL once. If another worker is starting at the same time,
+ # continue with the existing journal mode; normal connections remain safe.
+ for _ in range(5):
+  try:
+   c.execute('PRAGMA journal_mode=WAL').fetchone()
+   c.execute('PRAGMA synchronous=NORMAL')
+   break
+  except sqlite3.OperationalError as exc:
+   if 'locked' not in str(exc).lower() and 'busy' not in str(exc).lower(): raise
+   time.sleep(0.5)
  c.execute('''CREATE TABLE IF NOT EXISTS members(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,email TEXT UNIQUE NOT NULL,whatsapp TEXT NOT NULL,password_hash TEXT NOT NULL,role TEXT DEFAULT 'member',verified INTEGER DEFAULT 1,created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
  c.execute('''CREATE TABLE IF NOT EXISTS orders(id INTEGER PRIMARY KEY AUTOINCREMENT,member_id INTEGER,customer_name TEXT NOT NULL,whatsapp TEXT NOT NULL,email TEXT NOT NULL,game TEXT NOT NULL,package TEXT NOT NULL,unit_price INTEGER NOT NULL,quantity INTEGER NOT NULL,price INTEGER NOT NULL,bonus TEXT DEFAULT '',uid TEXT NOT NULL,region TEXT NOT NULL,player_name TEXT DEFAULT '',payment_method TEXT NOT NULL,receipt TEXT,status TEXT DEFAULT 'pending',created_at TEXT DEFAULT CURRENT_TIMESTAMP,confirmed_at TEXT,cancelled_at TEXT)''')
  c.execute('''CREATE TABLE IF NOT EXISTS wallet(id INTEGER PRIMARY KEY AUTOINCREMENT,member_id INTEGER UNIQUE NOT NULL,balance INTEGER DEFAULT 0,reserved INTEGER DEFAULT 0)''')
