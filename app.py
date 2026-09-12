@@ -246,7 +246,7 @@ def create_and_send_otp(email, purpose, phone, label='OTP'):
     code = f'{secrets.randbelow(1000000):06d}'
     c.execute(
         "INSERT INTO otp(email,code,purpose,expires_at,used,attempts,created_at) VALUES(?,?,?,?,0,0,?)",
-        (email, hash_otp(code), purpose, now + OTP_EXPIRY_SECONDS, 0, now)
+        (email, hash_otp(code), purpose, now + OTP_EXPIRY_SECONDS, now)
     )
     otp_id = c.execute("SELECT last_insert_rowid()").fetchone()[0]
     c.commit()
