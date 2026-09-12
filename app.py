@@ -1,4 +1,8 @@
-import os, sqlite3, secrets, time, hashlib, json, urllib.request, urllib.error
+import os, sqlite3, secrets, time, hashlib, json, urllib.request, urllib.error, threading
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 from functools import wraps
 from flask import Flask, render_template, request, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -32,13 +36,15 @@ PACKAGES = {
  }
 }
 
+# SQLite configuration. Keep connections short-lived and let SQLite handle
+# brief concurrent access with WAL + busy_timeout. Do NOT hold a process/file lock
+# for the lifetime of a connection, because that can make HTTP requests wait for
+# another worker and eventually produce Gateway Timeout.
 def db():
-    # SQLite can briefly be busy when Faable restarts or another request is committing.
-    # Use WAL + a generous busy timeout so normal concurrent requests wait instead of
-    # immediately failing with "database is locked".
     c = sqlite3.connect(DB, timeout=30, check_same_thread=False)
     c.row_factory = sqlite3.Row
     c.execute('PRAGMA busy_timeout=30000')
+    c.execute('PRAGMA foreign_keys=ON')
     c.execute('PRAGMA journal_mode=WAL')
     c.execute('PRAGMA synchronous=NORMAL')
     return c
@@ -129,10 +135,16 @@ def send_sms(recipient, message):
         method='POST'
     )
     try:
-        with urllib.request.urlopen(req, timeout=15) as response:
+        with urllib.request.urlopen(req, timeout=8) as response:
             body = json.loads(response.read().decode('utf-8') or '{}')
-    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as exc:
-        raise RuntimeError('SMS provider request failed') from exc
+    except urllib.error.HTTPError as exc:
+        try:
+            detail = exc.read().decode('utf-8', errors='replace')[:300]
+        except Exception:
+            detail = ''
+        raise RuntimeError(f'SMS provider HTTP {exc.code}: {detail or exc.reason}') from exc
+    except (urllib.error.URLError, TimeoutError) as exc:
+        raise RuntimeError(f'SMS provider connection failed: {exc}') from exc
     if body.get('status') not in (True, 'success'):
         raise RuntimeError(body.get('message') or 'SMS provider rejected the message')
     return body
@@ -233,9 +245,8 @@ def register():
     if not normalized:return jsonify(message='Enter a valid Sri Lankan mobile number'),400
     c=db()
     try:
-        # Take one short write transaction for member + wallet creation.
-        # The connection has a 30s busy timeout, so transient SQLite locks are retried
-        # by SQLite instead of immediately returning 500 to the browser.
+        # One short transaction for member + wallet creation. The connection-level
+        # advisory lock prevents concurrent workers from fighting over SQLite.
         c.execute('BEGIN IMMEDIATE')
         cur=c.execute(
             "INSERT INTO members(name,email,whatsapp,password_hash,verified) VALUES(?,?,?,?,0)",
@@ -253,9 +264,14 @@ def register():
         try: c.rollback()
         except Exception: pass
         c.close()
-        if 'locked' in str(exc).lower():
-            return jsonify(message='Database is busy. Please try again in a few seconds.'),503
-        raise
+        if 'locked' in str(exc).lower() or 'busy' in str(exc).lower():
+            return jsonify(message='Database is temporarily busy. Please retry once.'),503
+        return jsonify(message='Database error while creating the account.'),500
+    except Exception:
+        try: c.rollback()
+        except Exception: pass
+        c.close()
+        return jsonify(message='Unable to create the account safely.'),500
     c.close()
     try:
         create_and_send_otp(email,'register',normalized,'registration OTP')
