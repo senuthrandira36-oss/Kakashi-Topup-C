@@ -230,6 +230,15 @@ def send_sms(recipient, message):
         raise RuntimeError(body.get('message') or 'SMS provider rejected the message')
     return body
 
+def notify_admin(message):
+    try:
+        phone = normalize_phone(ADMIN_WHATSAPP)
+        if phone and TEXTLK_API_TOKEN and TEXTLK_SENDER_ID:
+            send_sms(phone, message)
+    except Exception:
+        # Admin notifications must never break the customer's successful request.
+        pass
+
 def create_and_send_otp(email, purpose, phone, label='OTP'):
     email = email.strip().lower()
     now = int(time.time())
@@ -375,8 +384,13 @@ def verify_otp():
     c=db()
     if purpose=='register':
         c.execute('UPDATE members SET verified=1 WHERE email=?',(email,))
+        u=c.execute('SELECT * FROM members WHERE email=?',(email,)).fetchone()
         c.commit(); c.close()
-        return jsonify(ok=True,purpose='register')
+        # Registration verification completes the login; the customer should not
+        # have to enter a second OTP immediately after creating an account.
+        session.clear(); session.permanent=True
+        session.update(role='member',member_id=u['id'],name=u['name'],email=u['email'],whatsapp=u['whatsapp'])
+        return jsonify(ok=True,purpose='register',user=current_user(),logged_in=True)
     pending=session.get('pending_login')
     if not pending or pending.get('email')!=email:
         c.close(); return jsonify(message='Login session expired. Please login again.'),401
@@ -409,6 +423,17 @@ def login():
         if not u or not check_password_hash(u['password_hash'],password):return jsonify(message='Invalid email or password'),401
         if not u['verified']:return jsonify(message='Please verify your account first'),403
         phone=u['whatsapp']; name=u['name']
+    # Members use normal email + password login. OTP is only used for the
+    # admin account. Password recovery uses the separate reset OTP flow.
+    if role == 'member':
+        session.clear(); session.permanent=True
+        # Re-fetch the member so the session is based on the current DB record.
+        c=db(); u=c.execute('SELECT * FROM members WHERE email=?',(email,)).fetchone(); c.close()
+        if not u:
+            return jsonify(message='Account not found'),404
+        session.update(role='member',member_id=u['id'],name=u['name'],email=u['email'],whatsapp=u['whatsapp'])
+        return jsonify(ok=True,otp_required=False,user=current_user())
+
     normalized=normalize_phone(phone)
     if not normalized:return jsonify(message='A valid mobile number is required for OTP login'),500
     session.clear()
@@ -505,7 +530,12 @@ def verify_uid():
 @app.get('/api/wallet')
 @member_required
 def wallet():
- c=db(); r=c.execute("SELECT balance,COALESCE(reserved,0) AS reserved FROM wallet WHERE member_id=?",(session['member_id'],)).fetchone(); c.close()
+ c=db()
+ # Keep one persistent wallet row per member; never reset an existing balance.
+ c.execute("INSERT OR IGNORE INTO wallet(member_id,balance,reserved) VALUES(?,0,0)",(session['member_id'],))
+ c.commit()
+ r=c.execute("SELECT balance,COALESCE(reserved,0) AS reserved FROM wallet WHERE member_id=?",(session['member_id'],)).fetchone()
+ c.close()
  balance=int(r['balance']) if r else 0; reserved=int(r['reserved']) if r else 0
  return jsonify(balance=balance,reserved=reserved,available_balance=max(0,balance-reserved),ez_cash=EZ_CASH)
 
@@ -520,7 +550,10 @@ def wallet_recharge():
  d=request.get_json(force=True); amount=money_int(d.get('amount')); receipt=d.get('receipt','')
  if amount<=0:return jsonify(message='Invalid amount'),400
  if not receipt:return jsonify(message='Payment receipt required'),400
- c=db(); cur=c.execute("INSERT INTO wallet_transactions(member_id,type,amount,status,receipt,payment_method,payment_number) VALUES(?,?,?,?,?,?,?)",(session['member_id'],'Wallet Recharge',amount,'pending',receipt,d.get('payment_method','eZ Cash'),EZ_CASH)); c.commit(); tid=cur.lastrowid; c.close(); return jsonify(ok=True,transaction_id=tid)
+ c=db(); cur=c.execute("INSERT INTO wallet_transactions(member_id,type,amount,status,receipt,payment_method,payment_number) VALUES(?,?,?,?,?,?,?)",(session['member_id'],'Wallet Recharge',amount,'pending',receipt,d.get('payment_method','eZ Cash'),EZ_CASH)); c.commit(); tid=cur.lastrowid; c.close()
+ # Send the admin a notification after the transaction is safely stored.
+ notify_admin(f'Kakashi Wallet Recharge #{tid}: Rs. {amount} pending approval. Member: {session.get("name","Member")} | {session.get("whatsapp","")}')
+ return jsonify(ok=True,transaction_id=tid)
 
 @app.get('/api/admin/wallet-recharges')
 @admin_required
@@ -553,22 +586,23 @@ def create_order():
  if package not in valid_prices or valid_prices[package]!=unit:return jsonify(message='Package price mismatch'),400
  if pay not in ('My Wallet','Bank Transfer'):return jsonify(message='Invalid payment method'),400
  if pay=='Bank Transfer' and not receipt:return jsonify(message='Bank transfer receipt required'),400
+ if pay=='My Wallet': receipt=''
  c=db()
  try:
   c.execute("BEGIN IMMEDIATE"); u=c.execute("SELECT * FROM members WHERE id=?",(session['member_id'],)).fetchone()
   if not u:c.rollback(); c.close(); return jsonify(message='Member account not found'),401
   if pay=='My Wallet':
-   w=c.execute("SELECT balance,COALESCE(reserved,0) AS reserved FROM wallet WHERE member_id=?",(session['member_id'],)).fetchone()
-   if not w:c.execute("INSERT INTO wallet(member_id,balance,reserved) VALUES(?,?,0)",(session['member_id'],0)); balance=reserved=0
-   else:balance=int(w['balance']); reserved=int(w['reserved'])
-   available=balance-reserved
-   if available<total:c.rollback(); c.close(); return jsonify(message=f'Insufficient wallet balance. Available Rs. {max(0,available)}. Required Rs. {total}'),400
-   c.execute("UPDATE wallet SET reserved=COALESCE(reserved,0)+? WHERE member_id=?",(total,session['member_id']))
+   w=c.execute("SELECT balance FROM wallet WHERE member_id=?",(session['member_id'],)).fetchone()
+   if not w:
+    c.execute("INSERT INTO wallet(member_id,balance,reserved) VALUES(?,?,0)",(session['member_id'],0)); balance=0
+   else: balance=int(w['balance'])
+   if balance<total:c.rollback(); c.close(); return jsonify(message=f'Insufficient wallet balance. Available Rs. {max(0,balance)}. Required Rs. {total}'),400
+   c.execute("UPDATE wallet SET balance=balance-? WHERE member_id=?",(total,session['member_id']))
   cur=c.execute("INSERT INTO orders(member_id,customer_name,whatsapp,email,game,package,unit_price,quantity,price,bonus,uid,region,player_name,payment_method,receipt,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending')",
                 (u['id'],u['name'],u['whatsapp'],u['email'],game,package,unit,q,total,d.get('bonus',''),uid,region,d.get('playerName','Unknown'),pay,receipt))
   oid=cur.lastrowid
   if pay=='My Wallet':
-   c.execute("INSERT INTO wallet_transactions(member_id,type,amount,status,payment_method,payment_number,order_id) VALUES(?,?,?,'pending',?,?,?)",
+   c.execute("INSERT INTO wallet_transactions(member_id,type,amount,status,payment_method,payment_number,order_id) VALUES(?,?,?,'approved',?,?,?)",
              (session['member_id'],'Order Payment',-total,'My Wallet','',oid))
   c.commit(); o=c.execute("SELECT * FROM orders WHERE id=?",(oid,)).fetchone(); c.close(); return jsonify(ok=True,order=dict(o))
  except Exception:
@@ -608,18 +642,26 @@ def admin_order_action(oid,action):
   if not o:c.rollback(); c.close(); return jsonify(message='Order not found'),404
   if o['status']!='pending':c.rollback(); c.close(); return jsonify(message=f'Order already {o["status"]}'),400
   if action=='confirm':
+   # My Wallet orders are deducted immediately when the customer places the order.
+   # Only legacy orders from the old reservation system need a financial settlement here.
    if o['payment_method']=='My Wallet':
-    w=c.execute("SELECT balance,COALESCE(reserved,0) AS reserved FROM wallet WHERE member_id=?",(o['member_id'],)).fetchone()
-    if not w or int(w['reserved'])<int(o['price']) or int(w['balance'])<int(o['price']):
-     c.rollback(); c.close(); return jsonify(message='Wallet reservation is missing or insufficient; order was not confirmed'),409
-    c.execute("UPDATE wallet SET balance=balance-?,reserved=reserved-? WHERE member_id=?",(o['price'],o['price'],o['member_id']))
-    c.execute("UPDATE wallet_transactions SET status='approved',approved_at=CURRENT_TIMESTAMP WHERE order_id=? AND type='Order Payment' AND status='pending'",(oid,))
+    tx=c.execute("SELECT status FROM wallet_transactions WHERE order_id=? AND type='Order Payment' ORDER BY id DESC LIMIT 1",(oid,)).fetchone()
+    if tx and tx['status']=='pending':
+     w=c.execute("SELECT balance,COALESCE(reserved,0) AS reserved FROM wallet WHERE member_id=?",(o['member_id'],)).fetchone()
+     if not w or int(w['reserved'])<int(o['price']):
+      c.rollback(); c.close(); return jsonify(message='Legacy wallet reservation is missing or insufficient; order was not confirmed'),409
+     c.execute("UPDATE wallet SET balance=balance-?,reserved=reserved-? WHERE member_id=?",(o['price'],o['price'],o['member_id']))
+     c.execute("UPDATE wallet_transactions SET status='approved',approved_at=CURRENT_TIMESTAMP WHERE order_id=? AND type='Order Payment' AND status='pending'",(oid,))
    c.execute("UPDATE orders SET status='completed',confirmed_at=CURRENT_TIMESTAMP WHERE id=?",(oid,))
   else:
    if o['payment_method']=='My Wallet':
-    w=c.execute("SELECT COALESCE(reserved,0) AS reserved FROM wallet WHERE member_id=?",(o['member_id'],)).fetchone()
-    if w and int(w['reserved'])>=int(o['price']):c.execute("UPDATE wallet SET reserved=reserved-? WHERE member_id=?",(o['price'],o['member_id']))
-    c.execute("UPDATE wallet_transactions SET status='cancelled',approved_at=CURRENT_TIMESTAMP WHERE order_id=? AND type='Order Payment' AND status='pending'",(oid,))
+    tx=c.execute("SELECT status FROM wallet_transactions WHERE order_id=? AND type='Order Payment' ORDER BY id DESC LIMIT 1",(oid,)).fetchone()
+    if tx and tx['status']=='pending':
+     w=c.execute("SELECT COALESCE(reserved,0) AS reserved FROM wallet WHERE member_id=?",(o['member_id'],)).fetchone()
+     if w and int(w['reserved'])>=int(o['price']):c.execute("UPDATE wallet SET reserved=reserved-? WHERE member_id=?",(o['price'],o['member_id']))
+     c.execute("UPDATE wallet_transactions SET status='cancelled',approved_at=CURRENT_TIMESTAMP WHERE order_id=? AND type='Order Payment' AND status='pending'",(oid,))
+    elif tx and tx['status']=='approved':
+     c.execute("UPDATE wallet SET balance=balance+? WHERE member_id=?",(o['price'],o['member_id']))
     c.execute("INSERT INTO wallet_transactions(member_id,type,amount,status,payment_method,order_id) VALUES(?, 'Refund', ?, 'approved', 'My Wallet', ?)",(o['member_id'],o['price'],oid))
    c.execute("UPDATE orders SET status='cancelled',cancelled_at=CURRENT_TIMESTAMP WHERE id=?",(oid,))
   c.commit(); o=c.execute("SELECT * FROM orders WHERE id=?",(oid,)).fetchone(); c.close(); return jsonify(ok=True,order=dict(o))
